@@ -1,7 +1,6 @@
 # CatEyeSdkTest
 COMAIOT 云控慧联 Android端SDK
 
-How to
 Step 1. Authorize JitPack and get your personal access token:
 
   jp_s5jeq1pp0brabn77ur6tpangf2
