@@ -8,7 +8,8 @@ Step 1. Authorize JitPack and get your personal access token:
 Step 2. Add the token to $HOME/.gradle/gradle.properties
 =
   authToken=jp_s5jeq1pp0brabn77ur6tpangf2<br>
-  Then use authToken as the username in your build.gradle:<br>
+Then use authToken as the username in your build.gradle:<br>
+=
   allprojects {<br>
     repositories {<br>
         ...<br>
