@@ -11,7 +11,8 @@ Step 2. Add the token to $HOME/.gradle/gradle.properties
 
   ***Then use authToken as the username in your build.gradle:***
 
-...
+
+```
   allprojects {
     repositories {
         ...
@@ -21,14 +22,17 @@ Step 2. Add the token to $HOME/.gradle/gradle.properties
         }
     }
  }
-...
+
+```
 
  **Add the dependency**
-...
+
+```
  dependencies {
      implementation 'com.github.comaiotsdk:cateyesdk:v1.0.7'
  }
-...
+
+```
 
 Step 3. (Optional) You may need to approve JitPack Application on GitHub
 =
