@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/input_ssid"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:hint="输入WiFi名称，不支持5GWiFi，请主动过滤"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <EditText
+        android:id="@+id/input_ssid_password"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:hint="输入WiFi密码"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+
+    <Button
+        android:id="@+id/input_next_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:text="下一步" />
+
+</LinearLayout>

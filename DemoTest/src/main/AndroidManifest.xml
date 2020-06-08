@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.comaiot.comaiotsdktest">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <application
+        android:name=".app.App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:testOnly="false"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+
+        <!--    android:usesCleartextTraffic="true" 这个属性可以在Android9以上正常访问接口和数据    -->
+
+        <activity
+            android:name=".act.MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+
+        <activity
+            android:name=".act.InputWifiActivity"
+            android:label="配置WiFi" />
+
+        <activity
+            android:name=".act.ShowQrActivity"
+            android:label="生成二维码" />
+
+        <activity
+            android:name=".act.QueryBindStatusActivity"
+            android:label="查询绑定状态" />
+
+        <activity
+            android:name=".act.DeviceSettingsActivity"
+            android:label="设备设置" />
+
+        <activity
+            android:name=".act.DeviceAlarmEventActivity"
+            android:label="有人按门铃" />
+
+        <activity
+            android:name=".act.VideoActivity"
+            android:label="音视频查看" />
+
+        <activity
+            android:name=".act.DeviceEventListActivity"
+            android:label="设备事件列表" />
+
+        <activity
+            android:name=".act.AudioActivity"
+            android:label="设备呼叫" />
+
+        <activity
+            android:name=".act.PlayVideoActivity"
+            android:label="播放视频" />
+
+        <activity
+            android:name=".act.ShareDeviceActivity"
+            android:label="设备分享" />
+
+        <activity
+            android:name=".act.AddShareDeviceActivity"
+            android:label="添加分享设备" />
+
+        <activity
+            android:name=".act.ShareDeviceListActivity"
+            android:label="分享设备列表" />
+    </application>
+
+</manifest>
