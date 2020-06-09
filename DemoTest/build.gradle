@@ -7,8 +7,8 @@ android {
         applicationId "com.comaiot.comaiotsdktest"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.7"
 
         //Cannot fit requested classes in a single dex file (# methods: 131010 > 65536)
         multiDexEnabled true

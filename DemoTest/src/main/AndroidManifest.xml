@@ -23,13 +23,19 @@
         <!--    android:usesCleartextTraffic="true" 这个属性可以在Android9以上正常访问接口和数据    -->
 
         <activity
-            android:name=".act.MainActivity"
+            android:name=".act.LoginJwtActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".act.MainActivity"
+            android:label="首页">
+
         </activity>
 
         <service android:name="org.eclipse.paho.android.service.MqttService" />

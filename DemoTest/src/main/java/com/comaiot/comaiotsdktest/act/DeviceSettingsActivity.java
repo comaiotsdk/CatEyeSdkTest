@@ -97,7 +97,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         if (mDeviceSettings == null) {
             CatEyeSDKInterface.get().getDeviceSettings(mDevUid);
-            if (null != mDevice && mDevice.getOnline().equals("offline")) {
+            if (null != mDevice && !mDevice.getOnline().equals("online")) {
                 getDeviceServerCacheSettings();
             }
         }

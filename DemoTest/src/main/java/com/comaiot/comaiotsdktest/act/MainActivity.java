@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -73,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
     private static final int REFRESH_TOKEN = 2;
 
     private int RELOGIN_DELAY_TIME = 3000;
+    private int delayTime = 1000;
+    private int loginExceptionCount = 0;
 
     private DeviceListAdapter mDeviceListAdapter;
 
@@ -90,6 +93,14 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String intentJwtToken = getIntent().getStringExtra("jwt");
+        if (!TextUtils.isEmpty(intentJwtToken)) {
+            jwtToken = intentJwtToken;
+        } else {
+            jwtToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI2NiIsImlhdCI6MTU1MTI3MTExNiwiaXNzIjoieW91ZGlhbiIsInN1YiI6IntcInVzZXJJZFwiOlwiMTgyMTExMTIyMjNcIn0iLCJleHAiOjE1NTEzNTc1MTZ9.899ceeb247da670b8d3223d2606b9d872799d9298563ebf90d0bab4c1554fce5";
+        }
+
         initView();
 
         // SDK 的API详解可以查看ReadMe文件夹中的index.html
@@ -107,9 +118,6 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
          * 关于JWT，不了解的可以参考这个网址：https://www.jianshu.com/p/576dbf44b2ae
          * 每个账户对应一个JWT，如果一直使用一个JWT，会产生数据混乱。
          */
-
-        //开发测试
-        jwtToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI2NiIsImlhdCI6MTU1MTI3MTExNiwiaXNzIjoieW91ZGlhbiIsInN1YiI6IntcInVzZXJJZFwiOlwiMTgyMTExMTIyMjNcIn0iLCJleHAiOjE1NTEzNTc1MTZ9.899ceeb247da670b8d3223d2606b9d872799d9298563ebf90d0bab4c1554fce5";
 
         try {
             CatEyeSDKInterface.get().loginForJwt(jwtToken, new AppSubscribeReqView() {
@@ -156,9 +164,15 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
         } catch (NoInternetException e) {
             AppUtils.e("The mobile phone is not have internet.");
         } catch (NotRegisterDeviceException e) {
+            if (loginExceptionCount >= 5) {
+                loginExceptionCount = 0;
+                delayTime = 1000;
+                throw new RuntimeException("Please check your AK/SK is config complete in com.comaiot.comaiotsdktest.app.App.");
+            }
             AppUtils.e("please wait a minute,wait sdk register device complete.");
-
-            mHandler.sendEmptyMessage(RELOGIN_INTENT);
+            mHandler.sendEmptyMessageDelayed(RELOGIN_INTENT, delayTime);
+            delayTime *= 2;
+            loginExceptionCount++;
         }
     }
 
@@ -286,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
                         if (deviceDevUid.equals(dev_uid)) {
                             partNerQueryDevice.setOnline(device.getOnline());
 
-                            if (partNerQueryDevice.getOnline().equals("offline")) {
+                            if (!partNerQueryDevice.getOnline().equals("online")) {
                                 getDeviceServerCacheSettings(partNerQueryDevice);
                             }
                             break;
