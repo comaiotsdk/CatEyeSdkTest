@@ -1,0 +1,695 @@
+详细描述
+主回调事件。
+
+IRtcEngineEventHandler 接口类用于SDK向 App 发送回调事件通知，App 通过继承该接口类的方法获取 SDK 的事件通知。 接口类的所有方法都有缺省（空）实现， App 可以根据需要只继承关心的事件。在回调方法中，App 不应该做耗时或者调用可能会引起阻塞的 API（如 SendMessage），否则可能影响 SDK 的运行。
+
+成员函数说明
+◆ onWarning()
+void io.agora.rtc.IRtcEngineEventHandler.onWarning	(	int 	warn	)	
+发生警告回调。
+
+该回调方法表示 SDK 运行时出现了（网络或媒体相关的）警告。通常情况下，SDK 上报的警告信息 App 可以忽略，SDK 会自动恢复。 例如和服务器失去连接时，SDK 可能会上报 WARN_LOOKUP_CHANNEL_TIMEOUT 警告，同时自动尝试重连。
+
+参数
+warn	警告代码，详细定义见 Warning Code
+◆ onError()
+void io.agora.rtc.IRtcEngineEventHandler.onError	(	int 	err	)	
+发生错误回调。
+
+表示 SDK 运行时出现了（网络或媒体相关的）错误。通常情况下，SDK 上报的错误意味着 SDK 无法自动恢复，需要 App 干预或提示用户。例如启动通话失败时，SDK 会上报 ERR_START_CALL 错误。App 可以提示用户启动通话失败，并调用 leaveChannel 退出频道。
+
+参数
+err	错误代码，详细定义见 Error Code
+◆ onJoinChannelSuccess()
+void io.agora.rtc.IRtcEngineEventHandler.onJoinChannelSuccess	(	String 	channel,
+int 	uid,
+int 	elapsed 
+)		
+加入频道回调。
+
+表示客户端已经登入服务器，且分配了频道 ID 和用户 ID。频道 ID 的分配是根据 joinChannel 方法中指定的频道名称。如果调用 joinChannel 时并未指定用户 ID，服务器就会分配一个。
+
+参数
+channel	频道名。
+uid	用户 ID 。如果 joinChannel 中指定了 uid，则此处返回该 ID；否则使用 Agora 服务器自动分配的 ID。
+elapsed	从 joinChannel 开始到发生此事件过去的时间（毫秒)。
+◆ onRejoinChannelSuccess()
+void io.agora.rtc.IRtcEngineEventHandler.onRejoinChannelSuccess	(	String 	channel,
+int 	uid,
+int 	elapsed 
+)		
+重新加入频道回调。
+
+有时候由于网络原因，客户端可能会和服务器失去连接，SDK 会进行自动重连，自动重连成功后触发此回调方法。
+
+参数
+channel	频道名。
+uid	用户 ID 。如果 joinChannel 中指定了 uid，则此处返回该 ID；否则使用 Agora 服务器自动分配的 ID。
+elapsed	从开始重连到重连成功的时间（毫秒）。
+◆ onLeaveChannel()
+void io.agora.rtc.IRtcEngineEventHandler.onLeaveChannel	(	RtcStats 	stats	)	
+离开频道回调。
+
+App 调用 leaveChannel 方法时，SDK 提示 App 离开频道成功。 在该回调方法中，App 可以得到此次通话的总通话时长、SDK 收发数据的流量等信息。
+
+参数
+stats	通话相关的统计信息：RtcStats
+◆ onClientRoleChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onClientRoleChanged	(	int 	oldRole,
+int 	newRole 
+)		
+用户角色已切换回调。
+
+直播场景下，当用户上下麦时会触发此回调，即主播切换为观众时，或观众切换为主播时。
+
+参数
+oldRole	切换前的角色
+newRole	切换后的角色
+◆ onUserJoined()
+void io.agora.rtc.IRtcEngineEventHandler.onUserJoined	(	int 	uid,
+int 	elapsed 
+)		
+远端用户/主播加入当前频道回调。
+
+通信模式下，该回调提示有远端用户加入了频道，并返回新加入用户的 ID；如果加入之前，已经有其他用户在频道中了，新加入的用户也会收到这些已有用户加入频道的回调。
+直播模式下，该回调提示有主播加入了频道，并返回该主播的用户 ID。如果在加入之前，已经有主播在频道中了，新加入的用户也会收到已有主播加入频道的回调。Agora 建议连麦主播不超过 17 人。
+参数
+uid	新加入频道的远端用户/主播 ID。
+elapsed	从调用 joinChannel/setClientRole 到触发该回调的延迟（毫秒）。
+注解
+直播场景下，
+主播间能相互收到新主播加入频道的回调，并能获得该主播的用户 ID。
+观众也能收到新主播加入频道的回调，并能获得该主播的用户 ID。
+当 Web 端加入直播频道时，只要 Web 端有推流，SDK 会默认该 Web 端为主播，并触发该回调。
+◆ onUserOffline()
+void io.agora.rtc.IRtcEngineEventHandler.onUserOffline	(	int 	uid,
+int 	reason 
+)		
+远端用户（通信模式）/主播（直播模式）离开当前频道回调。
+
+提示有远端用户/主播离开了频道（或掉线）。用户离开频道有两个原因，即正常离开和超时掉线：
+
+正常离开的时候，远端用户/主播会收到类似“再见”的消息，接收此消息后，判断用户离开频道。
+超时掉线的依据是，在一定时间内（通信场景为 20 秒，直播场景稍有延时），用户没有收到对方的任何数据包，则判定为对方掉线。在网络较差的情况下，有可能会误报。Agora 建议使用信令系统来做可靠的掉线检测。
+参数
+uid	主播 ID。
+reason	离线原因：
+USER_OFFLINE_QUIT(0)：用户主动离开
+USER_OFFLINE_DROPPED(1)：因过长时间收不到对方数据包，超时掉线。注意：由于 SDK 使用的是不可靠通道，也有可能对方主动离开本方没收到对方离开消息而误判为超时掉线
+USER_OFFLINE_BECOME_AUDIENCE(2)：用户身份从主播切换为观众（直播模式下）
+◆ onConnectionStateChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onConnectionStateChanged	(	int 	state,
+int 	reason 
+)		
+网络连接状态已改变回调。
+
+自从
+从 v2.3.2 起新增。
+该回调在网络连接状态发生改变的时候触发，并告知用户当前的网络连接状态，和引起网络状态改变的原因。
+
+参数
+state	当前的网络连接状态：
+CONNECTION_STATE_DISCONNECTED(1)：网络连接断开
+CONNECTION_STATE_CONNECTING(2)：建立网络连接中
+CONNECTION_STATE_CONNECTED(3)：网络已连接
+CONNECTION_STATE_RECONNECTING(4)：重新建立网络连接中
+CONNECTION_STATE_FAILED(5)：网络连接失败
+reason	引起当前网络连接状态发生改变的原因：
+CONNECTION_CHANGED_CONNECTING(0)：建立网络连接中
+CONNECTION_CHANGED_JOIN_SUCCESS(1)：成功加入频道
+CONNECTION_CHANGED_INTERRUPTED(2)：网络连接中断
+CONNECTION_CHANGED_BANNED_BY_SERVER(3)：网络连接被服务器禁止
+CONNECTION_CHANGED_JOIN_FAILED(4)：加入频道失败。
+CONNECTION_CHANGED_LEAVE_CHANNEL(5)：离开频道
+◆ onConnectionInterrupted()
+void io.agora.rtc.IRtcEngineEventHandler.onConnectionInterrupted	(		)	
+网络连接中断回调。
+
+弃用:
+从 v2.3.2 起废弃。不建议你使用。如果你希望获取 SDK 的网络连接状态改变事件，请改用 onConnectionStateChanged 回调。
+SDK 在和服务器建立连接后，失去了网络连接超过 4 秒，会触发该回调。在触发事件后，SDK 会主动重连服务器，所以该事件可以用于 UI 提示。 与 onConnectionLost 回调的区别是：
+
+onConnectionInterrupted 回调一定是发生在 joinChannel() 成功后，且 SDK 刚失去和服务器连接超过 4 秒时触发。
+onConnectionLost 回调是无论之前 joinChannel() 是否连接成功，只要 10 秒内和服务器无法建立连接都会触发。
+无论是哪种回调，除非 App 主动调用 leaveChannel，不然 SDK 会一直自动重连。
+
+◆ onConnectionLost()
+void io.agora.rtc.IRtcEngineEventHandler.onConnectionLost	(		)	
+网络连接中断，且 SDK 无法在 10 秒内连接服务器回调。
+
+SDK 在调用 joinChannel() 后，无论是否加入成功，只要 10 秒和服务器无法连接就会触发该回调。 与 onConnectionInterrupted 回调的区别是：
+
+onConnectionInterrupted 回调一定是发生在 joinChannel() 成功后，且 SDK 刚失去和服务器连接 4 秒时触发。
+onConnectionLost 回调是无论之前 joinChannel() 是否连接成功，只要 10 秒内和服务器无法建立连接都会触发。
+无论是哪种回调，除非 App 主动调用 leaveChannel，不然 SDK 会一直自动重连。
+
+◆ onConnectionBanned()
+void io.agora.rtc.IRtcEngineEventHandler.onConnectionBanned	(		)	
+网络连接已被服务器禁止回调。
+
+弃用:
+从 v2.3.2 起废弃。不建议你使用。如果你希望获取 SDK 的网络连接状态改变事件，请改用 onConnectionStateChanged 回调。
+当你被服务端禁掉连接的权限时，会触发该回调。
+
+◆ onApiCallExecuted()
+void io.agora.rtc.IRtcEngineEventHandler.onApiCallExecuted	(	int 	error,
+String 	api,
+String 	result 
+)		
+API 方法已执行回调。
+
+参数
+error	错误码。如果方法调用失败，会返回错误码 Error code；如果返回 0，则表示方法调用成功
+api	SDK 所调用的 API
+result	SDK 调用 API 的调用结果
+◆ onTokenPrivilegeWillExpire()
+void io.agora.rtc.IRtcEngineEventHandler.onTokenPrivilegeWillExpire	(	String 	token	)	
+Token 服务即将过期回调。
+
+在调用 joinChannel 时如果指定了 Token，由于 Token 具有一定的时效，在通话过程中如果 Token 即将失效，SDK 会提前 30 秒触发该回调，提醒 App 更新 Token。 当收到该回调时，用户需要重新在服务端生成新的 Token，然后调用 renewToken 将新生成的 Token 传给 SDK。
+
+参数
+token	即将服务失效的 Token
+◆ onRequestToken()
+void io.agora.rtc.IRtcEngineEventHandler.onRequestToken	(		)	
+Token 过期回调。
+
+在调用 joinChannel 时如果指定了 Token，由于 Token 具有一定的时效，在通话过程中 SDK 可能由于网络原因和服务器失去连接，重连时可能需要新的 Token。该回调通知 App 需要生成新的 Token，并需调用 renewToken 为 SDK 指定新的 Token。 之前的处理方法是在 onError 回调报告 ERR_TOKEN_EXPIRED(109)、ERR_INVALID_TOKEN(110) 时，App 需要生成新的 Token。在新版本中，原来的处理仍然有效，但建议把相关逻辑放进该回调里。
+
+◆ onMicrophoneEnabled()
+void io.agora.rtc.IRtcEngineEventHandler.onMicrophoneEnabled	(	boolean 	enabled	)	
+麦克风状态已改变回调。
+
+参数
+enabled	
+true：麦克风已启用
+false：麦克风已禁用
+◆ onAudioVolumeIndication()
+void io.agora.rtc.IRtcEngineEventHandler.onAudioVolumeIndication	(	AudioVolumeInfo [] 	speakers,
+int 	totalVolume 
+)		
+提示频道内谁正在说话以及说话者音量的回调。
+
+该回调提示频道内瞬时音量较高的几个用户的用户 ID 及他们的音量。默认禁用。可以通过启用说话者音量提示 enableAudioVolumeIndication 方法开启；开启后，无论频道内是否有人说话，都会按方法中设置的时间间隔返回提示音量。
+
+本地用户独享一个 onAudioVolumeIndication 回调；远端说话者共用一个 onAudioVolumeIndication 回调。
+
+本地用户独享的音量提示回调返回的 speakers 数组中： uid 为 0， volume 等于 totalVolume。 speakerNumber 无论本地用户是否说话始终为 1。
+远端说话者共用的音量提示回调返回的 speakers 数组包含音量较高的几个用户的用户 ID 及其音量。
+参数
+speakers	每个说话者的用户 ID 和音量信息的数组：AudioVolumeInfo
+totalVolume	（混音后的）总音量（0~255）
+注解
+用户调用 muteLocalAudioStream 方法会对 SDK 行为产生影响：
+本地用户调用该方法后 SDK 即不再返回本地用户的音量提示回调。
+远端用户调用该方法后 15 秒，远端说话者的音量提示回调将不再包含该用户；如果所有远端用户调用该方法后 15 秒，SDK 即不再返回远端说话者的音量提示回调。
+如果收到的音量提示回调中 speakers 数组为空，表示此时远端没有人说话。
+◆ onActiveSpeaker()
+void io.agora.rtc.IRtcEngineEventHandler.onActiveSpeaker	(	int 	uid	)	
+监测到活跃用户回调。
+
+如果用户开启了 enableAudioVolumeIndication 功能，则当音量检测模块监测到频道内有新的活跃用户说话时，会通过本回调返回该用户的 uid。
+
+参数
+uid	当前时间段声音最大的用户的 uid。如果返回的 uid 为 0，则默认为本地用户
+注解
+你需要开启 enableAudioVolumeIndication 方法才能收到该回调。
+uid 返回的是当前时间段内声音最大的用户 ID，而不是瞬时声音最大的用户 ID。
+◆ onFirstLocalAudioFrame()
+void io.agora.rtc.IRtcEngineEventHandler.onFirstLocalAudioFrame	(	int 	elapsed	)	
+已发送本地音频首帧回调。
+
+参数
+elapsed	从调用 joinChannel 方法直至该回调被触发的延迟（毫秒）。
+◆ onFirstRemoteAudioFrame()
+void io.agora.rtc.IRtcEngineEventHandler.onFirstRemoteAudioFrame	(	int 	uid,
+int 	elapsed 
+)		
+已接收远端音频首帧回调。
+
+参数
+uid	发送音频帧的远端用户的 ID
+elapsed	从调用 joinChannel 方法直至该回调被触发的延迟（毫秒）。
+◆ onVideoStopped()
+void io.agora.rtc.IRtcEngineEventHandler.onVideoStopped	(		)	
+视频功能停止回调。
+
+提示视频功能已停止。 App 如需在停止视频后对 view 做其他处理（例如显示其他画面），可以在这个回调中进行。
+
+◆ onFirstLocalVideoFrame()
+void io.agora.rtc.IRtcEngineEventHandler.onFirstLocalVideoFrame	(	int 	width,
+int 	height,
+int 	elapsed 
+)		
+已发送本地视频首帧回调。
+
+第一帧本地视频显示在视图上时，触发此回调。
+
+参数
+width	视频流宽（像素）
+height	视频流高（像素）
+elapsed	从调用 joinChannel 方法直至该回调被触发的延迟（毫秒） 如果在 joinChannel 之前调用了 startPreview，则返回的是从调用 startPreview 直至该回调被触发的延迟（毫秒）
+◆ onFirstRemoteVideoDecoded()
+void io.agora.rtc.IRtcEngineEventHandler.onFirstRemoteVideoDecoded	(	int 	uid,
+int 	width,
+int 	height,
+int 	elapsed 
+)		
+已完成远端视频首帧解码回调。
+
+收到第一帧远端视频流并解码成功时，触发此调用。App 可以在此回调中设置该用户的 View。
+
+参数
+uid	用户 ID，指定是哪个用户的视频流
+width	视频流宽（像素）
+height	视频流高（像素）
+elapsed	从调用 joinChannel 方法直至该回调被触发的延迟（毫秒）
+◆ onFirstRemoteVideoFrame()
+void io.agora.rtc.IRtcEngineEventHandler.onFirstRemoteVideoFrame	(	int 	uid,
+int 	width,
+int 	height,
+int 	elapsed 
+)		
+已显示远端视频首帧回调。
+
+第一帧远端视频显示在视图上时，触发此调用。App 可在此调用中获知出图时间（elapsed）。
+
+参数
+uid	用户 ID，指定是哪个用户的视频流
+width	视频流宽（像素）
+height	视频流高（像素）
+elapsed	从调用 joinChannel 加入频道开始到发生此事件过去的时间（毫秒）
+◆ onUserMuteAudio()
+void io.agora.rtc.IRtcEngineEventHandler.onUserMuteAudio	(	int 	uid,
+boolean 	muted 
+)		
+远端用户静音回调。
+
+提示有其他用户将他的音频流静音/取消静音。
+
+参数
+uid	用户 ID。
+muted	该用户是否静音：
+true: 该用户已静音音频
+false: 该用户已取消音频静音
+◆ onUserMuteVideo()
+void io.agora.rtc.IRtcEngineEventHandler.onUserMuteVideo	(	int 	uid,
+boolean 	muted 
+)		
+远端用户暂停/重新发送视频流回调。
+
+提示有其他用户暂停/恢复了视频流的发送。
+
+参数
+uid	用户 ID，提示是哪个用户的视频流。
+muted	
+true：该用户已暂停发送视频流
+false：该用户已恢复发送视频流
+◆ onUserEnableVideo()
+void io.agora.rtc.IRtcEngineEventHandler.onUserEnableVideo	(	int 	uid,
+boolean 	enabled 
+)		
+其他用户开/关视频模块回调。
+
+提示有其他用户启用/关闭了视频功能。
+
+参数
+uid	用户 ID，提示是哪个用户的视频流。
+enabled	
+true：该用户已启用视频功能。启用后，该用户可以进行视频通话或直播。
+false：该用户已关闭视频功能。关闭后，该用户只能进行语音通话或直播，不能显示、发送自己的视频，也不能接收、显示别人的视频。
+◆ onUserEnableLocalVideo()
+void io.agora.rtc.IRtcEngineEventHandler.onUserEnableLocalVideo	(	int 	uid,
+boolean 	enabled 
+)		
+远端用户开/关本地视频采集回调。
+
+提示有其他用户启用/关闭了本地视频功能。
+
+参数
+uid	用户 ID，提示是哪个用户的视频流。
+enabled	
+true：该用户已启用本地视频功能。启用后，其他用户可以接收到该用户的视频流。
+false：该用户已关闭视频功能。关闭后，该用户仍然可以接收其他用户的视频流，但其他用户接收不到该用户的视频流。
+◆ onVideoSizeChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onVideoSizeChanged	(	int 	uid,
+int 	width,
+int 	height,
+int 	rotation 
+)		
+本地或远端视频大小或旋转信息发生改变回调。
+
+参数
+uid	图像尺寸和旋转信息发生变化的用户 ID。如果返回的 uid 为 0，则表示本地用户
+width	视频流的宽度（像素）
+height	视频流的高度（像素）
+rotation	旋转信息 [0，360].
+◆ onRemoteVideoStateChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteVideoStateChanged	(	int 	uid,
+int 	state 
+)		
+远端用户视频流状态发生已变化回调。
+
+参数
+uid	发生视频流状态改变的远端用户 ID
+state	远端视频流状态：
+1：远端视频正常
+2：远端视频卡住
+注解
+该回调在两个视频帧间隔大于等于 600 ms 时才会触发。
+◆ onLocalPublishFallbackToAudioOnly()
+void io.agora.rtc.IRtcEngineEventHandler.onLocalPublishFallbackToAudioOnly	(	boolean 	isFallbackOrRecover	)	
+本地发布流已回退为音频流回调。
+
+如果你调用了设置本地推流回退选项 setLocalPublishFallbackOption 接口并将 option 设置为 AUDIO_ONLY(2) 时，当上行网络环境不理想、本地发布的媒体流回退为音频流时，或当上行网络改善、媒体流恢复为音视频流时，会触发该回调。 如果本地推流已回退为音频流，远端的 App 上会收到 onUserMuteVideo的回调事件。
+
+参数
+isFallbackOrRecover	本地推流已回退或恢复：
+true：由于网络环境不理想，本地发布的媒体流已回退为音频流。
+false：由于网络环境改善，发布的音频流已恢复为音视频流。
+◆ onRemoteSubscribeFallbackToAudioOnly()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteSubscribeFallbackToAudioOnly	(	int 	uid,
+boolean 	isFallbackOrRecover 
+)		
+远端订阅流已回退为音频流回调。
+
+如果你调用了设置远端订阅流回退选项 setRemoteSubscribeFallbackOption 接口并将 option 设置为 AUDIO_ONLY(2) 时，当下行网络环境不理想、仅接收远端音频流时，或当下行网络改善、恢复订阅音视频流时，会触发该回调。
+
+远端订阅流因弱网环境不能同时满足音视频而回退为小流时，你可以使用onRemoteVideoStats 方法来监控远端视频大小流的切换。
+
+参数
+uid	远端用户的 ID
+isFallbackOrRecover	远端订阅流已回退或恢复：
+true：由于网络环境不理想，远端订阅流已回退为音频流。
+false：由于网络环境改善，订阅的音频流已恢复为音视频流。
+◆ onAudioRouteChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onAudioRouteChanged	(	int 	routing	)	
+语音路由已变更回调。
+
+当调用 setEnableSpeakerphone 成功时， SDK 会通过该回调通知 App 语音路由状态已发生变化。该回调返回当前的语音路由已切换至听筒，外放(扬声器)，耳机或蓝牙。 其中 routing 定义如下:
+
+AUDIO_ROUTE_DEFAULT(-1)：使用默认的音频路由。
+AUDIO_ROUTE_HEADSET(0)：使用耳机为语音路由。
+AUDIO_ROUTE_EARPIECE(1)：使用听筒为语音路由。
+AUDIO_ROUTE_HEADSETNOMIC(2)：使用不带麦的耳机为语音路由。
+AUDIO_ROUTE_SPEAKERPHONE(3)：使用手机的扬声器为语音路由。
+AUDIO_ROUTE_LOUDSPEAKER(4)：使用外接的扬声器为语音路由。
+AUDIO_ROUTE_HEADSETBLUETOOTH(5)：使用蓝牙耳机为语音路由。
+◆ onCameraReady()
+void io.agora.rtc.IRtcEngineEventHandler.onCameraReady	(		)	
+摄像头就绪回调。
+
+提示已成功打开摄像头，可以开始捕获视频。如果摄像头打开失败，可在 onError 中处理相应错误。
+
+◆ onCameraFocusAreaChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onCameraFocusAreaChanged	(	Rect 	rect	)	
+摄像头对焦区域已改变回调。
+
+该回调表示相机的对焦区域发生了改变。
+
+参数
+rect	镜头内表示对焦的区域。
+◆ onCameraExposureAreaChanged()
+void io.agora.rtc.IRtcEngineEventHandler.onCameraExposureAreaChanged	(	Rect 	rect	)	
+摄像头曝光区域已改变回调。
+
+自从
+从 v2.3.2 起新增。
+参数
+rect	镜头内表示曝光的区域。
+◆ onAudioQuality()
+void io.agora.rtc.IRtcEngineEventHandler.onAudioQuality	(	int 	uid,
+int 	quality,
+short 	delay,
+short 	lost 
+)		
+远端音频质量回调。
+
+弃用:
+从 v2.3.2 起废弃。不建议你使用。如果你希望获取远端音频的质量回调，请改用 onRemoteAudioStats 方法。
+该回调描述远端用户在通话中的音频质量，针对每个远端用户/主播每 2 秒触发一次。如果远端同时存在多个用户/主播，该回调每 2 秒会被触发多次。
+
+参数
+uid	用户 ID，指定是谁发的音频流
+quality	语音质量：
+QUALITY_UNKNOWN(0)：质量未知
+QUALITY_EXCELLENT(1)：质量极好
+QUALITY_GOOD(2)：用户主观感觉和极好差不多，但码率可能略低于极好
+QUALITY_POOR(3)：用户主观感受有瑕疵但不影响沟通
+QUALITY_BAD(4)：勉强能沟通但不顺畅
+QUALITY_VBAD(5)：网络质量非常差，基本不能沟通
+QUALITY_DOWN(6)：网络连接已断开，完全无法沟通
+delay	音频包从发送端到接收端的延迟（毫秒）。包括声音采样前处理、网络传输、网络抖动缓冲引起的延迟。
+lost	音频包从发送端到接收端的丢包率（）
+◆ onRtcStats()
+void io.agora.rtc.IRtcEngineEventHandler.onRtcStats	(	RtcStats 	stats	)	
+当前通话统计回调。 该回调在通话中每两秒触发一次。
+
+参数
+stats	RtcEngine 数据，详细定义见 RtcStats
+◆ onLastmileQuality()
+void io.agora.rtc.IRtcEngineEventHandler.onLastmileQuality	(	int 	quality	)	
+通话前网络上下行 last mile 质量报告回调。
+
+该回调描述本地用户在加入频道前的 last mile 网络探测的结果，其中 last mile 是指设备到 Agora 边缘服务器的网络状态。在 enableLastmileTest 之后，该回调函数每 2 秒触发一次。
+
+参数
+quality	网络上下行质量，基于上下行网络的丢包率和抖动计算，探测结果主要反映上行网络的状态
+QUALITY_UNKNOWN(0)：质量未知
+QUALITY_EXCELLENT(1)：质量极好
+QUALITY_GOOD(2)：用户主观感觉和极好差不多，但码率可能略低于极好
+QUALITY_POOR(3)：用户主观感受有瑕疵但不影响沟通
+QUALITY_BAD(4)：勉强能沟通但不顺畅
+QUALITY_VBAD(5)：网络质量非常差，基本不能沟通
+QUALITY_DOWN(6)：完全无法沟通
+◆ onNetworkQuality()
+void io.agora.rtc.IRtcEngineEventHandler.onNetworkQuality	(	int 	uid,
+int 	txQuality,
+int 	rxQuality 
+)		
+通话中每个用户的网络上下行 last mile 质量报告回调。
+
+该回调描述每个用户/主播在通话中的 last mile 网络状态，其中 last mile 是指设备到 Agora 边缘服务器的网络状态。该回调每 2 秒触发一次。如果远端有多个用户/主播，该回调每 2 秒会被触发多次。
+
+参数
+uid	用户 ID。表示该回调报告的是持有该 ID 的用户的网络质量。当 uid 为 0 时，返回的是本地用户的网络质量。
+txQuality	该用户的上行网络质量，基于上行视频的发送码率、上行丢包率、平均往返时延和网络抖动计算。该值代表当前的上行网络质量，帮助判断是否可以支持当前设置的视频编码属性。假设直播模式下上行码率是 1000 Kbps，那么支持 640 × 480 的分辨率、30 fps 的帧率没有问题，但是支持 1280 x 720 的分辨率就会有困难。
+QUALITY_UNKNOWN(0)：质量未知
+QUALITY_EXCELLENT(1)：质量极好
+QUALITY_GOOD(2)：用户主观感觉和极好差不多，但码率可能略低于极好
+QUALITY_POOR(3)：用户主观感受有瑕疵但不影响沟通
+QUALITY_BAD(4)：勉强能沟通但不顺畅
+QUALITY_VBAD(5)：网络质量非常差，基本不能沟通
+QUALITY_DOWN(6)：网络连接断开，完全无法沟通
+rxQuality	该用户的下行网络质量，基于下行网络的丢包率、平均往返延时和网络抖动计算。
+QUALITY_UNKNOWN(0)：质量未知
+QUALITY_EXCELLENT(1)：质量极好
+QUALITY_GOOD(2)：用户主观感觉和极好差不多，但码率可能略低于极好
+QUALITY_POOR(3)：用户主观感受有瑕疵但不影响沟通
+QUALITY_BAD(4)：勉强能沟通但不顺畅
+QUALITY_VBAD(5)：网络质量非常差，基本不能沟通
+QUALITY_DOWN(6)：网络连接断开，完全无法沟通
+◆ onLocalVideoStats()
+void io.agora.rtc.IRtcEngineEventHandler.onLocalVideoStats	(	LocalVideoStats 	stats	)	
+通话中本地视频流的统计信息回调。
+
+该回调描述本地设备发送视频流的统计信息，每 2 秒触发一次。
+
+参数
+stats	本地视频统计数据，详细定义见 Local Video Stats
+◆ onRemoteVideoStats()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteVideoStats	(	RemoteVideoStats 	stats	)	
+通话中远端视频流的统计信息回调。
+
+该回调描述远端用户在通话中端到端的视频流状态，针对每个远端用户/主播每 2 秒触发一次。如果远端同时存在多个用户/主播，该回调每 2 秒会被触发多次。
+
+相比 onRemoteVideoTransportStats 回调，该回调为视频引擎统计，贴近用户最终的主观感受。
+
+参数
+stats	远端视频统计数据，详细定义见 Remote Video Stats
+◆ onRemoteAudioStats()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteAudioStats	(	RemoteAudioStats 	stats	)	
+通话中远端音频流的统计信息回调。
+
+自从
+从 v2.3.2 起新增。用于替换 onAudioQuality 回调。
+该回调描述远端用户在通话中端到端的音频流统计信息，针对每个远端用户/主播每 2 秒触发一次。如果远端同时存在多个用户/主播，该回调每 2 秒会被触发多次。
+
+相比 onRemoteAudioTransportStats 回调，该回调更贴近用户的主观感受。比如，当网络发生丢包时，因 FEC（Forward Error Correction，向前纠错码）或重传恢复，最终的音频丢帧率不高，则可以认为整个质量较好。
+
+参数
+stats	接收到的远端音频统计数据，详细定义见 Remote Audio Stats
+◆ onLocalVideoStat()
+void io.agora.rtc.IRtcEngineEventHandler.onLocalVideoStat	(	int 	sentBitrate,
+int 	sentFrameRate 
+)		
+本地视频流统计信息回调。
+
+弃用:
+该方法已废弃。不建议你使用。如果你希望获取本地视频统计信息回调，请改用 onLocalVideoStats 方法。
+报告更新本地视频统计信息，该回调函数每两秒触发一次。
+
+参数
+sentBitrate	（上次统计后）发送的码率 (Kbps)
+sentFrameRate	（上次统计后）发送的帧率 (fps)
+◆ onRemoteVideoStat()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteVideoStat	(	int 	uid,
+int 	delay,
+int 	receivedBitrate,
+int 	receivedFrameRate 
+)		
+远端视频流统计信息回调。
+
+弃用:
+该方法已废弃。不建议你使用。如果你希望获取远端视频统计信息回调，请改用 onRemoteVideoStats 方法。
+报告远端视频统计信息，该回调函数每两秒触发一次。
+
+参数
+uid	用户 ID，指定是哪个用户的视频流。
+delay	延迟（毫秒）。
+receivedBitrate	接收码率（Kbps）。
+receivedFrameRate	接收帧率（fps）。
+◆ onRemoteAudioTransportStats()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteAudioTransportStats	(	int 	uid,
+int 	delay,
+int 	lost,
+int 	rxKBitRate 
+)		
+通话中远端音频流传输的统计信息回调。
+
+该回调描述远端用户通话中端到端的网络统计信息，通过音频包计算，用客观的数据，如丢包、网络延迟等，展示当前网络状态。
+
+通话中，当用户收到远端用户/主播发送的音频数据包后，会每 2 秒触发一次该回调。
+
+和 onRemoteAudioStats 回调相比，该回调以数据展示当前网络状态，因此更客观。
+
+参数
+uid	用户 ID，指定是哪个用户/主播的音频包
+delay	音频包从发送端到接收端的延时（毫秒）
+lost	音频包从发送端到接收端的丢包率（）
+rxKBitRate	远端音频包的接收码率（Kbps）
+◆ onRemoteVideoTransportStats()
+void io.agora.rtc.IRtcEngineEventHandler.onRemoteVideoTransportStats	(	int 	uid,
+int 	delay,
+int 	lost,
+int 	rxKBitRate 
+)		
+通话中远端视频流传输的统计信息回调。
+
+该回调描述远端用户通话中端到端的网络统计信息，通过视频包计算，用客观的数据，如丢包、网络延迟等 ，展示当前网络状态。
+
+通话中，当用户收到远端用户/主播发送的视频数据包后，会每 2 秒触发一次该回调。
+
+和 onRemoteVideoStats 回调相比，该回调以数据展示当前网络状态，因此更客观。
+
+参数
+uid	用户 ID，指定是哪个用户/主播的视频包
+delay	视频包从发送端到接收端的延时（毫秒）
+lost	视频包从发送端到接收端的丢包率（）
+rxKBitRate	远端视频包的接收码率（Kbps）
+◆ onAudioMixingFinished()
+void io.agora.rtc.IRtcEngineEventHandler.onAudioMixingFinished	(		)	
+本地音乐文件播放已结束回调。
+
+当调用 startAudioMixing 播放伴奏音乐结束后，会触发该回调。 如果该方法调用失败，会在 onWarning 回调里，返回警告码 WARN_AUDIO_MIXING_OPEN_ERROR。
+
+◆ onAudioEffectFinished()
+void io.agora.rtc.IRtcEngineEventHandler.onAudioEffectFinished	(	int 	soundId	)	
+本地音效文件播放已结束回调。
+
+当调用 playEffect 播放音效结束后，会触发该回调。
+
+参数
+soundId	指定音效的 ID。每个音效均有唯一的 ID。
+◆ onStreamPublished()
+void io.agora.rtc.IRtcEngineEventHandler.onStreamPublished	(	String 	url,
+int 	error 
+)		
+旁路推流开启回调。
+
+该回调用于通知主播是否推流成功。
+
+参数
+url	主播推流地址或导入的外部音视频流地址
+error	错误代码，详细定义见 Error code
+ERR_OK(0)：推流成功
+ERR_FAILED(1)：推流失败
+ERR_INVALID_ARGUMENT(2)：参数错误。如果你在调用 addPublishStreamUrl 前没有调用 setLiveTranscoding 配置 LiveTranscoding，SDK 会返回该错误。
+ERR_TIMEOUT(10)：推流超时未成功
+ERR_ALREADY_IN_USE(19)：推流地址已经在推流
+ERR_ENCRYPTED_STREAM_NOT_ALLOWED_PUBLISHED(130)：推流已加密不能推流
+◆ onStreamUnpublished()
+void io.agora.rtc.IRtcEngineEventHandler.onStreamUnpublished	(	String 	url	)	
+旁路推流停止回调。
+
+该回调用于通知主播停止推流成功。
+
+参数
+url	被删除的 RTMP 推流地址
+◆ onTranscodingUpdated()
+void io.agora.rtc.IRtcEngineEventHandler.onTranscodingUpdated	(		)	
+旁路推流设置被更新回调。
+
+该回调用于通知主播 CDN 转码已成功更新。
+
+◆ onStreamInjectedStatus()
+void io.agora.rtc.IRtcEngineEventHandler.onStreamInjectedStatus	(	String 	url,
+int 	uid,
+int 	status 
+)		
+导入在线媒体流状态回调。
+
+该回调表明向直播导入的外部视频流的状态。
+
+参数
+url	导入进直播的外部视频源的 URL 地址
+uid	用户 ID
+status	导入的外部视频源状态：
+INJECT_STREAM_STATUS_START_SUCCESS(0)：外部视频流导入成功
+INJECT_STREAM_STATUS_START_ALREADY_EXIST(1)：外部视频流已存在
+INJECT_STREAM_STATUS_START_UNAUTHORIZED(2)：外部视频流导入未经授权
+INJECT_STREAM_STATUS_START_TIMEDOUT(3)：导入外部视频流超时
+INJECT_STREAM_STATUS_START_FAILED(4)：外部视频流导入失败
+INJECT_STREAM_STATUS_STOP_SUCCESS(5)：外部视频流停止导入成功
+INJECT_STREAM_STATUS_STOP_NOT_FOUND = 6：未找到要停止导入的外部视频流
+INJECT_STREAM_STATUS_STOP_UNAUTHORIZED(7)：要停止导入的外部视频流未经授权
+INJECT_STREAM_STATUS_STOP_TIMEDOUT(8)：停止导入外部视频流超时
+INJECT_STREAM_STATUS_STOP_FAILED(9)：停止导入外部视频流失败
+INJECT_STREAM_STATUS_BROKEN(10)：导入的外部视频流被中断
+◆ onStreamMessage()
+void io.agora.rtc.IRtcEngineEventHandler.onStreamMessage	(	int 	uid,
+int 	streamId,
+byte [] 	data 
+)		
+接收到对方数据流消息的回调。
+
+该回调表示已在 5 秒内按照顺序收到了对方发送的数据包。
+
+参数
+uid	用户 ID
+streamId	数据流 ID
+data	接收到的数据
+◆ onStreamMessageError()
+void io.agora.rtc.IRtcEngineEventHandler.onStreamMessageError	(	int 	uid,
+int 	streamId,
+int 	error,
+int 	missed,
+int 	cached 
+)		
+接收对方数据流消息发生错误的回调。
+
+该回调表示没有在 5 秒内收到对方发送的数据包。
+
+参数
+uid	用户 ID
+streamId	数据流 ID
+error	错误代码，详细定义见 Error code
+missed	丢失的消息数量
+cached	数据流中断时，后面缓存的消息数量
+◆ onMediaEngineLoadSuccess()
+void io.agora.rtc.IRtcEngineEventHandler.onMediaEngineLoadSuccess	(		)	
+媒体引擎成功加载的回调。
+
+◆ onMediaEngineStartCallSuccess()
+void io.agora.rtc.IRtcEngineEventHandler.onMediaEngineStartCallSuccess	(		)	
+媒体引擎成功启动的回调。

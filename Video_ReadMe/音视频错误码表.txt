@@ -1,0 +1,264 @@
+详细描述
+错误代码。
+
+类成员变量说明
+◆ ERR_OK
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_OK = Constants.ERR_OK
+static
+0：没有错误。
+
+◆ ERR_FAILED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_FAILED = Constants.ERR_FAILED
+static
+1：一般性的错误（没有明确归类的错误原因）。
+
+◆ ERR_INVALID_ARGUMENT
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_INVALID_ARGUMENT = Constants.ERR_INVALID_ARGUMENT
+static
+2：API 调用了无效的参数。例如指定的频道名含有非法字符。
+
+◆ ERR_NOT_READY
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NOT_READY = Constants.ERR_NOT_READY
+static
+3：SDK 初始化失败。Agora 建议尝试以下处理方法：
+
+检查音频设备状态
+检查程序集完整性
+尝试重新初始化 SDK
+◆ ERR_NOT_SUPPORTED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NOT_SUPPORTED = Constants.ERR_NOT_SUPPORTED
+static
+4：SDK 当前状态不支持此操作。
+
+◆ ERR_REFUSED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_REFUSED = Constants.ERR_REFUSED
+static
+5：调用被拒绝。仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App 。
+
+◆ ERR_BUFFER_TOO_SMALL
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_BUFFER_TOO_SMALL = Constants.ERR_BUFFER_TOO_SMALL
+static
+6：传入的缓冲区大小不足以存放返回的数据。
+
+◆ ERR_NOT_INITIALIZED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NOT_INITIALIZED = Constants.ERR_NOT_INITIALIZED
+static
+7：SDK 尚未初始化，就调用其 API。请确认在调用 API 之前已创建 RtcEngine 对象并完成初始化。
+
+◆ WARN_INVALID_VIEW
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.WARN_INVALID_VIEW = Constants.WARN_INVALID_VIEW
+static
+8：指定的 View 无效，使用视频功能时需要指定 View，如果 View 尚未指定，则返回该警告。
+
+◆ ERR_NO_PERMISSION
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NO_PERMISSION = Constants.ERR_NO_PERMISSION
+static
+9：没有操作权限，仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App。
+
+◆ ERR_TIMEDOUT
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_TIMEDOUT = Constants.ERR_TIMEDOUT
+static
+10：API 调用超时。有些 API 调用需要 SDK 返回结果，如果 SDK 处理时间过长，超过 10 秒没有返回，会出现此错误。
+
+◆ ERR_CANCELED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_CANCELED = Constants.ERR_CANCELED
+static
+11：请求被取消。仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App。
+
+◆ ERR_TOO_OFTEN
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_TOO_OFTEN = Constants.ERR_TOO_OFTEN
+static
+12：调用频率太高。仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App。
+
+◆ ERR_BIND_SOCKET
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_BIND_SOCKET = Constants.ERR_BIND_SOCKET
+static
+13：SDK 内部绑定到网络 Socket 失败。仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App。
+
+◆ ERR_NET_DOWN
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NET_DOWN = Constants.ERR_NET_DOWN
+static
+14：网络不可用。仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App。
+
+◆ ERR_NET_NOBUFS
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NET_NOBUFS = Constants.ERR_NET_NOBUFS
+static
+15：没有网络缓冲区可用。仅供 SDK 内部使用，不通过 API 或者回调事件返回给 App。
+
+◆ WARN_INIT_VIDEO
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.WARN_INIT_VIDEO = Constants.WARN_INIT_VIDEO
+static
+16：初始化视频功能失败。有可能是因视频资源被占用导致的。用户无法看到视频画面，但不影响语音通信。
+
+◆ ERR_JOIN_CHANNEL_REJECTED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_JOIN_CHANNEL_REJECTED = Constants.ERR_JOIN_CHANNEL_REJECTED
+static
+17：加入频道被拒绝。一般有以下原因：
+
+用户已进入频道，再次调用加入频道的 API，例如 joinChannel，会返回此错误。停止调用该方法即可。
+用户在做 Echo 测试时尝试加入频道。等待 Echo test 结束后再加入频道即可。
+◆ ERR_LEAVE_CHANNEL_REJECTED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_LEAVE_CHANNEL_REJECTED = Constants.ERR_LEAVE_CHANNEL_REJECTED
+static
+18：离开频道失败。一般有以下原因：
+
+用户已离开频道，再次调用退出频道的 API，例如 leaveChannel，会返回此错误。停止调用该方法即可。
+用户尚未加入频道，就调用退出频道的 API。这种情况下无需额外操作。
+◆ ERR_INVALID_APP_ID
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_INVALID_APP_ID = Constants.ERR_INVALID_APP_ID
+static
+101：不是有效的 APP ID。请更换有效的 APP ID 重新加入频道。
+
+◆ ERR_INVALID_CHANNEL_NAME
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_INVALID_CHANNEL_NAME = Constants.ERR_INVALID_CHANNEL_NAME
+static
+102：不是有效的频道名。请更换有效的频道名重新加入频道。
+
+◆ ERR_TOKEN_EXPIRED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_TOKEN_EXPIRED = Constants.ERR_TOKEN_EXPIRED
+static
+109：当前使用的 Token 过期，不再有效。一般有以下原因：
+
+Token 授权时间戳无效：Token 授权时间戳为 Token 生成时的时间戳，自 1970 年 1 月 1 日开始到当前时间的描述。授权该 Token 在生成后的 24 小时内可以访问 Agora 服务。如果 24 小时内没有访问，则该 Token 无法再使用。需要重新在服务端申请生成 Token。
+Token 服务到期时间戳已过期：用户设置的服务到期时间戳小于当前时间戳，无法继续使用 Agora 服务（比如正在进行的通话会被强制终止）；设置服务到期时间并不意味着 Token 失效，而仅仅用于限制用户使用当前服务的时间。需要重新在服务端申请生成 Token。
+◆ ERR_INVALID_TOKEN
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_INVALID_TOKEN = Constants.ERR_INVALID_TOKEN
+static
+110：生成的 Token 无效。一般有以下原因：
+
+用户在 Dashboard 上启用了 App Certificate，但仍旧在代码里仅使用了 App ID。当启用了 App Certificate，必须使用 Token.
+字段 uid 为生成 Token 的必须字段，用户在调用 io.agora.rtc.RtcEngine#joinChannel(String, String, String, int) 加入频道时必须设置相同的 uid
+◆ ERR_CONNECTION_INTERRUPTED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_CONNECTION_INTERRUPTED = Constants.ERR_CONNECTION_INTERRUPTED
+static
+111：网络连接中断。仅适用于 Agora Web SDK。
+
+◆ ERR_CONNECTION_LOST
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_CONNECTION_LOST = Constants.ERR_CONNECTION_LOST
+static
+112：网络连接丢失。仅适用于 Agora Web SDK。
+
+◆ ERR_NOT_IN_CHANNEL
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_NOT_IN_CHANNEL = Constants.ERR_NOT_IN_CHANNEL
+static
+113：在调用 sendStreamMessage 时，如果用户不在频道内，会发生该错误。
+
+◆ ERR_SIZE_TOO_LARGE
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_SIZE_TOO_LARGE = Constants.ERR_SIZE_TOO_LARGE
+static
+114：在调用 sendStreamMessage 时，当发送的数据长度大于 1024 个字节时，会发生该错误。
+
+◆ ERR_BITRATE_LIMIT
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_BITRATE_LIMIT = Constants.ERR_BITRATE_LIMIT
+static
+115：在调用 sendStreamMessage 时，当发送的数据码率超过限制（6KB/s）时，会发生该错误。
+
+◆ ERR_TOO_MANY_DATA_STREAMS
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_TOO_MANY_DATA_STREAMS = Constants.ERR_TOO_MANY_DATA_STREAMS
+static
+116：在调用 createDataStream 时，如果创建的数据通道过多（超过 5 个通道），会发生该错误。
+
+◆ ERR_DECRYPTION_FAILED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_DECRYPTION_FAILED = Constants.ERR_DECRYPTION_FAILED
+static
+120：解密失败，可能是用户加入频道用了不同的密码。请检查加入频道时的设置，或尝试重新加入频道。
+
+◆ ERR_CLIENT_IS_BANNED_BY_SERVER
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_CLIENT_IS_BANNED_BY_SERVER = Constants.ERR_CLIENT_IS_BANNED_BY_SERVER
+static
+123：此用户被服务器禁止。
+
+◆ ERR_LOAD_MEDIA_ENGINE
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_LOAD_MEDIA_ENGINE = Constants.ERR_LOAD_MEDIA_ENGINE
+static
+1001：加载媒体引擎失败。
+
+◆ ERR_START_CALL
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_START_CALL = Constants.ERR_START_CALL
+static
+1002：启动媒体引擎开始通话失败。请尝试重新进入频道。
+
+◆ ERR_START_CAMERA
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_START_CAMERA = Constants.ERR_START_CAMERA
+static
+1003：启动摄像头失败，请检查摄像头是否被其他应用占用，或者尝试重新进入频道。
+
+◆ ERR_START_VIDEO_RENDER
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_START_VIDEO_RENDER = Constants.ERR_START_VIDEO_RENDER
+static
+1004：启动视频渲染模块失败。
+
+◆ ERR_ADM_GENERAL_ERROR
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_GENERAL_ERROR = Constants.ERR_ADM_GENERAL_ERROR
+static
+1005：音频设备模块：音频设备出现错误（未明确指明为何种错误）。请检查音频设备是否被其他应用占用，或者尝试重新进入频道。
+
+◆ ERR_ADM_JAVA_RESOURCE
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_JAVA_RESOURCE = Constants.ERR_ADM_JAVA_RESOURCE
+static
+1006：音频设备模块：使用 java 资源出现错误。
+
+◆ ERR_ADM_SAMPLE_RATE
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_SAMPLE_RATE = Constants.ERR_ADM_SAMPLE_RATE
+static
+1007：音频设备模块：设置的采样频率出现错误。
+
+◆ ERR_ADM_INIT_PLAYOUT
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_INIT_PLAYOUT = Constants.ERR_ADM_INIT_PLAYOUT
+static
+1008：音频设备模块：初始化播放设备出现错误。请检查播放设备是否被其他应用占用，或者尝试重新进入频道。
+
+◆ ERR_ADM_START_PLAYOUT
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_START_PLAYOUT = Constants.ERR_ADM_START_PLAYOUT
+static
+1009：音频设备模块：启动播放设备出现错误。请检查播放设备是否正常，或者尝试重新进入频道。
+
+◆ ERR_ADM_STOP_PLAYOUT
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_STOP_PLAYOUT = Constants.ERR_ADM_STOP_PLAYOUT
+static
+1010：音频设备模块：停止播放设备出现错误。
+
+◆ ERR_ADM_INIT_RECORDING
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_INIT_RECORDING = Constants.ERR_ADM_INIT_RECORDING
+static
+1011：音频设备模块：初始化录音设备时出现错误。请检查录音设备是否正常，或者尝试重新进入频道。
+
+◆ ERR_ADM_START_RECORDING
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_START_RECORDING = Constants.ERR_ADM_START_RECORDING
+static
+1012：音频设备模块：启动录音设备出现错误。请检查录音设备是否正常，或者尝试重新进入频道。
+
+◆ ERR_ADM_STOP_RECORDING
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_STOP_RECORDING = Constants.ERR_ADM_STOP_RECORDING
+static
+1013：音频设备模块：停止录音设备出现错误。
+
+◆ ERR_ADM_RUNTIME_PLAYOUT_ERROR
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_RUNTIME_PLAYOUT_ERROR = Constants.ERR_ADM_RUNTIME_PLAYOUT_ERROR
+static
+1015：音频设备模块：运行时播放出现错误。请检查录音设备是否正常，或者尝试重新进入频道。
+
+◆ ERR_ADM_RUNTIME_RECORDING_ERROR
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_RUNTIME_RECORDING_ERROR = Constants.ERR_ADM_RUNTIME_RECORDING_ERROR
+static
+1017：音频设备模块：运行时录音错误。请检查录音设备是否正常，或者尝试重新进入频道。
+
+◆ ERR_ADM_RECORD_AUDIO_FAILED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_RECORD_AUDIO_FAILED = Constants.ERR_ADM_RECORD_AUDIO_FAILED
+static
+1018：音频设备模块：录音失败。
+
+◆ ERR_ADM_INIT_LOOPBACK
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_INIT_LOOPBACK = Constants.ERR_ADM_INIT_LOOPBACK
+static
+1022：音频设备模块：初始化 Loopback 设备错误。
+
+◆ ERR_ADM_START_LOOPBACK
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_ADM_START_LOOPBACK = Constants.ERR_ADM_START_LOOPBACK
+static
+1023：音频设备模块：启动 Loopback 设备错误。
+
+◆ ERR_VDM_CAMERA_NOT_AUTHORIZED
+final int io.agora.rtc.IRtcEngineEventHandler.ErrorCode.ERR_VDM_CAMERA_NOT_AUTHORIZED = Constants.ERR_VDM_CAMERA_NOT_AUTHORIZED
+static
+1501：视频设备模块：没有摄像头使用权限。请检查是否已经打开摄像头权限。

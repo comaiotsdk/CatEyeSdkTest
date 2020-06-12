@@ -1,0 +1,1800 @@
+详细描述
+RtcEngine 类包含 App 调用的主要方法，调用 RtcEngine 的接口最好在同一个线程进行，不建议在不同的线程同时调用。
+
+成员函数说明
+◆ create()
+static synchronized RtcEngine io.agora.rtc.RtcEngine.create	(	Context 	context,
+String 	appId,
+IRtcEngineEventHandler 	handler 
+)		throws Exception
+static
+创建 RtcEngine 实例。
+
+目前 Agora Native SDK 只支持一个 RtcEngine 实例，每个 App 仅创建一个 RtcEngine 对象。RtcEngine 类的所有接口函数，如无特殊说明，都是异步调用，对接口的调用建议在同一个线程进行。所有返回值为 int 型的 API，如无特殊说明，返回值 0 为调用成功，返回值小于 0 为调用失败。
+
+参数
+context	安卓活动 (Android Activity) 的上下文
+appId	Agora 为 App 开发者签发的 APP ID
+handler	io.agora.rtc.IRtcEngineEventHandler 是一个提供了缺省实现的抽象类，SDK 通过该抽象类向 App 报告 SDK 运行时的各种事件
+返回
+RtcEngine 对象
+异常
+Exception	调用该方法时可能会发生的异常说明
+注解
+同一个 APP ID 才能进入同一个频道实现通话或直播。
+一个 App ID 只能创建一个 Engine。如果 App 内存在多个 App ID，则需要创建多个 Engine。使用时先调用 destroy 销毁引擎，再调用该方法。
+◆ destroy()
+static synchronized void io.agora.rtc.RtcEngine.destroy	(		)	
+static
+销毁 RtcEngine 实例。
+
+该方法释放 Agora SDK 使用的所有资源。有些 App 只在用户需要时才进行语音通话，不需要时则将资源释放出来用于其他操作，该方法对这类程序可能比较有用。只要调用了 destroy 方法，用户将无法再使用和回调该 SDK 内的其它方法。如需再次使用通信功能，必须重新创建 create 一个 RtcEngine 实例（instance)。
+
+注解
+该方法需要在子线程中操作。
+该方法为同步调用。在等待 RtcEngine 对象资源释放后再返回。APP 不应该在 SDK 产生的回调中调用该接口，否则由于 SDK 要等待回调返回才能回收相关的对象资源，会造成死锁。
+◆ setChannelProfile()
+abstract int io.agora.rtc.RtcEngine.setChannelProfile	(	int 	profile	)	
+abstract
+设置频道模式。
+
+该方法用于设置频道模式 (Profile)。Agora RtcEngine 需知道 App 的使用场景（例如通信模式或直播模式），从而使用不同的优化手段。
+
+参数
+profile	频道模式：
+Communication(0)：通信模式
+Live Broadcast(1)：直播模式
+Gaming(2)：仅适用于 Agora Gaming SDK
+返回
+0：方法调用成功
+< 0：方法调用失败
+注解
+相同频道内的所有用户必须使用相同的频道模式。
+如果想要切换模式，则需要先调用 destroy 销毁当前引擎，然后使用 create 创建一个新的引擎后，再调用该方法设置新的频道模式。
+该方法必须在 加入频道 前调用和设置，进入频道后无法再设置。
+目前通信模式不支持自采集的 Texture 编码，只支持原始音视频数据。
+◆ setClientRole()
+abstract int io.agora.rtc.RtcEngine.setClientRole	(	int 	role	)	
+abstract
+设置直播场景下的用户角色。
+
+在加入频道前，用户需要通过本方法设置观众（默认）或主播模式。在加入频道后，用户可以通过本方法切换用户模式。
+
+参数
+role	用户角色。详细定义见 Client Role
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ joinChannel()
+abstract int io.agora.rtc.RtcEngine.joinChannel	(	String 	token,
+String 	channelName,
+String 	optionalInfo,
+int 	optionalUid 
+)		
+abstract
+加入频道。
+
+该方法让用户加入通话频道，在同一个频道内的用户可以互相通话，多个用户加入同一个频道，可以群聊。使用不同 App ID 的 App 是不能互通的。如果已在通话中，用户必须调用 leaveChannel 退出当前通话，才能进入下一个频道。
+
+参数
+token	在 App 服务器端生成的用于鉴权的 Token。该参数为可选，如果用户启用的是 App ID，可以将该值设为 null。如果用户想使用 Token，Agora 还会给开发者分发一个 App Certificate，并结合 Token 的算法在 App 的服务器端生成 Token。与 App ID 相比，Token 适用于安全要求较高的开发环境
+安全要求不高：将值设为 null
+安全要求高：将值设置为 Token 值。如果你已经启用了 App Certificate, 请务必使用 Token
+channelName	标识通话的频道名称，长度在 64 字节以内的字符串。以下为支持的字符集范围（共 89 个字符）：
+26 个小写英文字母 a-z
+26 个大写英文字母 A-Z
+10 个数字 0-9
+空格
+"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
+optionalInfo	（非必选项）开发者需加入的任何附加信息。一般可设置为空字符串，或频道相关信息。该信息不会传递给频道内的其他用户
+optionalUid	（非必选项）用户 ID，32 位无符号整数。建议设置范围：1 到 (2^32-1)，并保证唯一性。如果不指定（即设为 0），SDK 会自动分配一个，并在 onJoinChannelSuccess 回调方法中返回，App 层必须记住该返回值并维护，SDK 不对该返回值进行维护。uid 在 SDK 内部用 32 位无符号整数表示，由于 Java 不支持无符号整数，uid 被当成 32 位有符号整数处理，对于过大的整数，Java 会表示为负数，如有需要可以用 (uid&0xffffffffL) 转换成 64 位整数
+注解
+频道内每个用户的 UID 必须是唯一的。如果将 UID 设为 0，系统将自动分配一个 UID。
+警告
+请确保用于生成 Token 的 App ID 和 create 方法创建 RtcEngine 对象时用的 App ID 一致。
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_INVALID_ARGUMENT(-2)
+ERR_NOT_READY(-3)
+ERR_REFUSED(-5)
+◆ leaveChannel()
+abstract int io.agora.rtc.RtcEngine.leaveChannel	(		)	
+abstract
+离开频道。
+
+离开频道，即挂断或退出通话。 当调用 joinChannel API 方法后，必须调用 leaveChannel 结束通话，否则无法开始下一次通话。 不管当前是否在通话中，都可以调用 leaveChannel，没有副作用。该方法会把会话相关的所有资源释放掉。该方法是异步操作，调用返回时并没有真正退出频道。在真正退出频道后，SDK 会触发 onLeaveChannel 回调。
+
+注解
+如果你调用了 leaveChannel 后立即调用 destroy 方法，SDK 将无法触发 onLeaveChannel 回调。
+如果你在旁路推流过程中调用了 leaveChannel 方法， SDK 将自动调用 removeInjectStreamUrl 方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ renewToken()
+abstract int io.agora.rtc.RtcEngine.renewToken	(	String 	token	)	
+abstract
+更新 Token。
+
+该方法用于更新 Token。如果启用了 Token 机制，过一段时间后使用的 Token 会失效。当：
+
+发生 onTokenPrivilegeWillExpire 回调时，或发生
+onError 回调报告 ERR_TOKEN_EXPIRED(-109)) 时，或发生
+onRequestToken 回调报告 ERR_TOKEN_EXPIRED(-109) 时，
+App 应重新获取 Token，然后调用该 API 更新 Token，否则 SDK 无法和服务器建立连接。
+
+参数
+token	新的 Token
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ enableWebSdkInteroperability()
+abstract int io.agora.rtc.RtcEngine.enableWebSdkInteroperability	(	boolean 	enabled	)	
+abstract
+打开与 Web SDK 的互通（仅在直播下适用）。
+
+该方法打开或关闭与 Agora Web SDK 的互通。该方法仅在直播模式下适用，通信模式下默认互通是打开的。
+
+参数
+enabled	是否打开与 Agora Web SDK 的互通：
+true：打开互通
+false：关闭互通（默认）
+返回
+0：方法调用成功
+<0：方法调用失败
+◆ getConnectionState()
+abstract int io.agora.rtc.RtcEngine.getConnectionState	(		)	
+abstract
+获取当前网络连接状态。
+
+自从
+从 v2.3.2 起新增。
+返回
+当前的网络连接状态：
+CONNECTION_STATE_DISCONNECTED(1)：网络连接断开
+CONNECTION_STATE_CONNECTING(2)：建立网络连接中
+CONNECTION_STATE_CONNECTED(3)：网络已连接
+CONNECTION_STATE_RECONNECTING(4)：重新建立网络连接中
+CONNECTION_STATE_FAILED(5)：网络连接失败
+◆ enableAudio()
+abstract int io.agora.rtc.RtcEngine.enableAudio	(		)	
+abstract
+启用音频模块（默认为开启状态）。
+
+注解
+该方法设置的是内部引擎为开启状态，在频道内和频道外均可调用，且在 leaveChannel 后仍然有效。
+该方法重置整个引擎，响应速度较慢，因此 Agora 建议使用如下方法来控制音频模块：
+enableLocalAudio：是否启动麦克风采集并创建本地音频流
+muteLocalAudioStream：是否发布本地音频流
+muteRemoteAudioStream：是否接收并播放远端音频流
+muteAllRemoteAudioStreams：是否接收并播放所有远端音频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ disableAudio()
+abstract int io.agora.rtc.RtcEngine.disableAudio	(		)	
+abstract
+关闭音频模块。
+
+注解
+该方法设置的是内部引擎为禁用状态，在频道内和频道外均可调用，且在 leaveChannel 后仍然有效。
+该方法重置整个引擎，响应速度较慢，因此 Agora 建议使用如下方法来控制音频模块：
+enableLocalAudio：是否启动麦克风采集并创建本地音频流
+muteLocalAudioStream：是否发布本地音频流
+muteRemoteAudioStream：是否接收并播放远端音频流
+muteAllRemoteAudioStreams：是否接收并播放所有远端音频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ pauseAudio()
+abstract int io.agora.rtc.RtcEngine.pauseAudio	(		)	
+abstract
+禁用频道中的音频功能。
+
+弃用:
+该方法已废弃。不建议你使用。如果你想禁用频道中的音频功能，请改用 disableAudio 方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ resumeAudio()
+abstract int io.agora.rtc.RtcEngine.resumeAudio	(		)	
+abstract
+启用频道中的音频功能。
+
+弃用:
+该方法已废弃。不建议你使用。如果你想启用频道中的音频功能，请改用 enableAudio 方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setAudioProfile()
+abstract int io.agora.rtc.RtcEngine.setAudioProfile	(	int 	profile,
+int 	scenario 
+)		
+abstract
+设置音频编码配置。
+
+参数
+profile	设置采样率，码率，编码模式和声道数，详细定义见 AudioProfile
+scenario	设置音频应用场景，详细定义见 AudioScenario
+注解
+该方法需要在 joinChannel 之前设置好，joinChannel 后设置不生效。
+通信模式下，该方法设置 profile 生效，设置 scenario 不生效。
+通信和直播模式下，音质（码率）会有网络自适应的调整，通过该方法设置的是一个最高码率。
+音乐教学场景下，建议将 Profile 设置为 MUSIC_HIGH_QUALITY (4)，Scenario 设置为 GAME_STREAMING (3)。
+◆ setHighQualityAudioParameters()
+abstract int io.agora.rtc.RtcEngine.setHighQualityAudioParameters	(	boolean 	fullband,
+boolean 	stereo,
+boolean 	fullBitrate 
+)		
+abstract
+设置音频高音质选项。
+
+弃用:
+该方法已废弃。不建议你使用。如果你希望设置音频高音质选项，请改用 setAudioProfile 方法。
+该方法设置音频高音质选项。请在加入频道前调用本方法并一次性设置好三个模式。切勿在加入频道后再次调用本方法。
+
+参数
+fullband	全频带编解码器（48 kHz 采样率）, 不兼容 1.7.4 以前版本
+true：启用全频带编解码器
+false：禁用全频带编解码器
+stereo	立体声编解码器，不兼容 1.7.4 以前版本
+true：启用立体声编解码器
+false：禁用立体声编解码器
+fullBitrate	高码率模式，建议仅在纯音频模式下使用
+true：启用高码率模式
+false：禁用高码率模式
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ adjustRecordingSignalVolume()
+abstract int io.agora.rtc.RtcEngine.adjustRecordingSignalVolume	(	int 	volume	)	
+abstract
+调节录音音量。
+
+参数
+volume	录音信号音量，可在 0~400 范围内进行调节：
+0：静音
+100：原始音量
+400：最大可为原始音量的 4 倍（自带溢出保护）
+返回
+0：方法调用成功
+<0：方法调用失败
+◆ adjustPlaybackSignalVolume()
+abstract int io.agora.rtc.RtcEngine.adjustPlaybackSignalVolume	(	int 	volume	)	
+abstract
+调节播放音量。
+
+参数
+volume	播放信号音量，可在 0~400 范围内进行调节：
+0：静音
+100：原始音量
+400：最大可为原始音量的 4 倍（自带溢出保护）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ enableAudioVolumeIndication()
+abstract int io.agora.rtc.RtcEngine.enableAudioVolumeIndication	(	int 	interval,
+int 	smooth 
+)		
+abstract
+启用说话者音量提示。
+
+该方法允许 SDK 定期向 App 反馈当前谁在说话以及说话者的音量。启用该方法后，无论频道内是否有人说话，都会在说话声音音量提示回调 onAudioVolumeIndication 回调中按设置的间隔时间返回音量提示。
+
+参数
+interval	指定音量提示的时间间隔：
+≤ 0：禁用音量提示功能。
+> 0：返回音量提示的间隔，单位为毫秒。建议设置到大于 200 毫秒。最小不得少于 10 毫秒，否则会收不到 onAudioVolumeIndication 回调。
+smooth	平滑系数，指定音量提示的灵敏度。取值范围为 [0, 10]，建议值为 3，数字越大，波动越灵敏；数字越小，波动越平滑。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ enableAudioQualityIndication()
+abstract int io.agora.rtc.RtcEngine.enableAudioQualityIndication	(	boolean 	enabled	)	
+abstract
+启用音频质量通知回调。
+
+该方法启用音频质量通知回调。一旦启用，onAudioQuality 将被定期触发。
+
+参数
+enabled	是否启用音频质量通知回调
+true：启用
+false：禁用（默认）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ enableLocalAudio()
+abstract int io.agora.rtc.RtcEngine.enableLocalAudio	(	boolean 	enabled	)	
+abstract
+开/关本地音频采集。
+
+当 App 加入频道时，它的语音功能默认是开启的。该方法可以关闭或重新开启本地语音功能，停止或重新开始本地音频采集及处理。
+
+该方法不影响接收或播放远端音频流，适用于只听不发的用户场景。
+
+语音功能关闭或重新开启后，会收到回调 onMicrophoneEnabled。
+
+参数
+enabled	
+true：重新开启本地语音功能，即开启本地语音采集或处理（默认）
+false：关闭本地语音功能，即停止本地语音采集或处理
+注解
+该方法需要在 joinChannel 之后调用才能生效。
+该方法与 muteLocalAudioStream 的区别在于：
+enableLocalAudio：开启或关闭本地语音采集及处理
+muteLocalAudioStream：停止或继续发送本地音频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ muteLocalAudioStream()
+abstract int io.agora.rtc.RtcEngine.muteLocalAudioStream	(	boolean 	muted	)	
+abstract
+开/关本地音频发送。
+
+静音/取消静音。该方法用于允许/禁止往网络发送本地音频流。
+
+参数
+muted	
+true：麦克风静音
+false：取消静音（默认）
+注解
+该方法不影响录音状态，并没有禁用麦克风。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ muteRemoteAudioStream()
+abstract int io.agora.rtc.RtcEngine.muteRemoteAudioStream	(	int 	uid,
+boolean 	muted 
+)		
+abstract
+接收/停止接收指定音频流。
+
+参数
+uid	指定的用户 ID
+muted	
+true：停止接收指定用户的音频流
+false：继续接收指定用户的音频流（默认）
+注解
+如果之前有调用过 muteAllRemoteAudioStreams (true) 停止接收所有远端音频流，在调用本 API 之前请确保你已调用 muteAllRemoteAudioStreams (false)。muteAllRemoteAudioStreams 是全局控制，muteRemoteAudioStream 是精细控制。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ muteAllRemoteAudioStreams()
+abstract int io.agora.rtc.RtcEngine.muteAllRemoteAudioStreams	(	boolean 	muted	)	
+abstract
+接收/停止接收所有音频流。
+
+参数
+muted	
+true：停止接收所有远端音频流
+false：继续接收所有远端音频流（默认）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setDefaultMuteAllRemoteAudioStreams()
+abstract int io.agora.rtc.RtcEngine.setDefaultMuteAllRemoteAudioStreams	(	boolean 	muted	)	
+abstract
+设置是否默认接收音频流。 该方法在加入频道前后都可调用。如果在加入频道后调用，会接收不到后面加入频道的用户的音频流。
+
+参数
+muted	是否默认不接收所有远端音频：
+true：默认不接收所有远端音频流
+false：默认接收所有远端音频流（默认）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ enableVideo()
+abstract int io.agora.rtc.RtcEngine.enableVideo	(		)	
+abstract
+启用视频模块。
+
+该方法用于打开视频模式。可以在加入频道前或者通话中调用，在加入频道前调用，则自动开启视频模式，在通话中调用则由音频模式切换为视频模式。调用 disableVideo 方法可关闭视频模式。
+
+注解
+该方法设置的是内部引擎为开启状态，在频道内和频道外均可调用，且在 leaveChannel 后仍然有效。
+该方法重置整个引擎，响应速度较慢，因此 Agora 建议使用如下方法来控制视频模块：
+enableLocalVideo：是否启动摄像头采集并创建本地视频流
+muteLocalVideoStream：是否发布本地视频流
+muteRemoteVideoStream：是否接收并播放远端视频流
+muteAllRemoteVideoStreams：是否接收并播放所有远端视频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ disableVideo()
+abstract int io.agora.rtc.RtcEngine.disableVideo	(		)	
+abstract
+关闭视频模块。
+
+该方法用于关闭视频。可以在加入频道前或者通话中调用，在加入频道前调用，则自动开启纯音频模式，在通话中调用则由视频模式切换为纯音频频模式。调用 enableVideo 方法可开启视频模式。
+
+注解
+该方法设置的是内部引擎为禁用状态，在频道内和频道外均可调用，且在 leaveChannel 后仍然有效。
+该方法重置整个引擎，响应速度较慢，因此 Agora 建议使用如下方法来控制视频模块：
+enableLocalVideo：是否启动摄像头采集并创建本地视频流
+muteLocalVideoStream：是否发布本地视频流
+muteRemoteVideoStream：是否接收并播放远端视频流
+muteAllRemoteVideoStreams：是否接收并播放所有远端视频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setVideoProfile() [1/2]
+abstract int io.agora.rtc.RtcEngine.setVideoProfile	(	int 	profile,
+boolean 	swapWidthAndHeight 
+)		
+abstract
+设置视频属性。
+
+弃用:
+从 v2.3.2 起废弃。不建议你使用。如果你希望设置视频编码属性，请改用 setVideoEncoderConfiguration 方法。
+该方法设置视频的编码属性。 如果用户加入频道后不需要重新设置视频编码属性，则 Agora 建议在 enableVideo 前调用该方法，可以加快首帧出图的时间。
+
+参数
+profile	视频属性，详细定义见 Video Profile
+swapWidthAndHeight	SDK 会按照你选择的视频属性 (profile) 输出固定宽高的视频。该参数设置是否交换宽和高：
+true：交换宽和高，交换后视频为 Portrait（竖屏）布局，即宽 < 高
+false：（默认）不交换宽和高，视频为 Landscape（横屏）布局，即宽 > 高
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setVideoProfile() [2/2]
+abstract int io.agora.rtc.RtcEngine.setVideoProfile	(	int 	width,
+int 	height,
+int 	frameRate,
+int 	bitrate 
+)		
+abstract
+手动设置视频属性。
+
+弃用:
+从 v2.3.2 起废弃。不建议你使用。如果你希望设置视频编码属性，请改用 setVideoEncoderConfiguration 方法。
+该方法手动设置视频的编码属性。 如果用户加入频道后不需要重新设置视频编码属性，则 Agora 建议在 enableVideo 前调用该方法，可以加快首帧出图的时间。
+
+参数
+width	你想要设置的视频宽度，宽 × 高的最大值不超过 1280 × 720。
+height	你想要设置的视频高度，宽 × 高的最大值不超过 1280 × 720。
+frameRate	你想要设置的视频帧率，最高值不超过 30，如： 5、10、15、24、30 等。
+bitrate	你想要设置的视频码率，需要开发者根据想要设置的视频的宽、高和帧率，根据 Bitrate 中的码率参考表，手动推算出合适值。宽和高固定的情况下，码率随帧率的变化而变化：
+若选取的帧率为 5 FPS，则推算码率为上表推荐码率除以 2。
+若选取的帧率为 15 FPS，则推算码率为上表推荐码率。
+若选取的帧率为 30 FPS，则推算码率为上表码率乘以 1.5。
+若选取其余帧率，等比例推算即可。
+若设置的视频码率超出合理范围，SDK 会自动按照合理区间处理码率。
+◆ setVideoEncoderConfiguration()
+abstract int io.agora.rtc.RtcEngine.setVideoEncoderConfiguration	(	VideoEncoderConfiguration 	config	)	
+abstract
+设置视频编码属性。
+
+自从
+从 v2.3.0 起新增。用于替换 setVideoProfile 方法。
+该方法设置视频编码属性。每个属性对应一套视频参数，如分辨率、帧率、码率、视频方向等。 所有设置的参数均为理想情况下的最大值。当视频引擎因网络环境等原因无法达到设置的分辨率、帧率或码率的最大值时，会取最接近最大值的那个值。
+
+如果用户加入频道后不需要重新设置视频编码属性，则 Agora 建议在 enableVideo 前调用该方法，可以加快首帧出图的时间。
+
+参数
+config	视频编码属性，详细定义见 VideoEncoderConfiguration
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setupLocalVideo()
+abstract int io.agora.rtc.RtcEngine.setupLocalVideo	(	VideoCanvas 	local	)	
+abstract
+设置本地视图。 该方法设置本地视图。App 通过调用此接口绑定本地视频流的显示视图 (View)，并设置视频显示模式。在 App 开发中，通常在初始化后调用该方法进行本地视频设置，然后再加入频道。退出频道后，绑定仍然有效，如果需要解除绑定，可以指定空 (null) View 调用 setupLocalVideo。
+
+参数
+local	本地视频显示属性，详细定义见 Video Canvas
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setupRemoteVideo()
+abstract int io.agora.rtc.RtcEngine.setupRemoteVideo	(	VideoCanvas 	remote	)	
+abstract
+设置远端用户视图。
+
+该方法绑定远程用户和显示视图，即设定用户 ID 指定的用户用哪个视图显示。调用该接口时需要指定远程视频的用户 ID，一般可以在进频道前提前设置好。
+
+如果 App 不能事先知道对方的用户 ID，可以在 APP 收到 onUserJoined 事件时设置。如果启用了视频录制功能，视频录制服务会做为一个哑客户端加入频道，因此其他客户端也会收到它的 onUserJoined 事件，App 不应给它绑定视图（因为它不会发送视频流），如果 App 不能识别哑客户端，可以在 onFirstRemoteVideoDecoded 事件时再绑定视图。解除某个用户的绑定视图可以把 view 设置为空。退出频道后，SDK 会把远程用户的绑定关系清除掉。
+
+参数
+remote	远端视图属性，详细定义见 Video Canvas
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setLocalRenderMode()
+abstract int io.agora.rtc.RtcEngine.setLocalRenderMode	(	int 	mode	)	
+abstract
+设置本地视频显示模式。
+
+该方法设置本地视频显示模式。App 可以多次调用此方法更改显示模式。
+
+参数
+mode	视频显示模式：
+RENDER_MODE_HIDDEN(1)：优先保证视窗被填满。视频尺寸等比缩放，直至整个视窗被视频填满。如果视频长宽与显示窗口不同，多出的视频将被截掉
+RENDER_MODE_FIT(2)：优先保证视频内容全部显示。视频尺寸等比缩放，直至视频窗口的一边与视窗边框对齐。如果视频长宽与显示窗口不同，视窗上未被填满的区域将被涂黑
+RENDER_MODE_ADAPTIVE(3)：已废弃，不再推荐使用
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setRemoteRenderMode()
+abstract int io.agora.rtc.RtcEngine.setRemoteRenderMode	(	int 	uid,
+int 	mode 
+)		
+abstract
+设置远端视频显示模式。
+
+该方法设置远端视频显示模式。App 可以多次调用此方法更改显示模式。
+
+参数
+uid	远端用户 ID
+mode	视频显示模式：
+RENDER_MODE_HIDDEN(1)：优先保证视窗被填满。视频尺寸等比缩放，直至整个视窗被视频填满。如果视频长宽与显示窗口不同，多出的视频将被截掉
+RENDER_MODE_FIT(2)：优先保证视频内容全部显示。视频尺寸等比缩放，直至视频窗口的一边与视窗边框对齐。如果视频长宽与显示窗口不同，视窗上未被填满的区域将被涂黑
+RENDER_MODE_ADAPTIVE(3)：已废弃，不再推荐使用
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ CreateRendererView()
+static SurfaceView io.agora.rtc.RtcEngine.CreateRendererView	(	Context 	context	)	
+static
+创建渲染视图。
+
+该方法创建视频渲染视图，返回 SurfaceView 的类型。View 的操作和布局由 App 管理， Agora SDK 在 App 提供的 View 上进行渲染。显示视频视图必须调用该方法，而不是直接调用 SurfaceView。
+
+参数
+context	安卓活动 (Android Activity) 的上下文。
+返回
+SurfaceView
+◆ startPreview()
+abstract int io.agora.rtc.RtcEngine.startPreview	(		)	
+abstract
+开启视频预览。
+
+该方法用于在进入频道前启动本地视频预览。调用该 API 前，必须：
+
+调用 enableVideo 开启视频功能。
+调用 setupLocalVideo 设置预览窗口及属性。
+注解
+使用该方法启用了本地视频预览后，如果直接调用 leaveChannel 退出频道，并不会关闭预览。如需关闭预览，请调用 stopPreview。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ stopPreview()
+abstract int io.agora.rtc.RtcEngine.stopPreview	(		)	
+abstract
+停止视频预览。
+
+返回
+0：方法调用成功
+<0：方法调用失败
+◆ enableLocalVideo()
+abstract int io.agora.rtc.RtcEngine.enableLocalVideo	(	boolean 	enabled	)	
+abstract
+开/关本地视频采集。
+
+该方法禁用/启用本地视频功能。该方法用于只看不发的视频场景。 请在 enableVideo 后调用该方法，否则该方法可能无法正常使用。 调用 enableVideo 后，本地视频默认开启。使用该方法可以开启或关闭本地视频，且不影响接收远端视频。
+
+参数
+enabled	是否启用本地视频：
+true：开启本地视频采集和渲染（默认）
+false：关闭使用本地摄像头设备。关闭后，远端用户会接收不到本地用户的视频流；但本地用户依然可以接收远端用户的视频流。设置为 false 时，该方法不需要本地有摄像头。
+注解
+该方法设置的是内部引擎为启用或禁用状态，在 leaveChannel 后仍然有效。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ muteLocalVideoStream()
+abstract int io.agora.rtc.RtcEngine.muteLocalVideoStream	(	boolean 	muted	)	
+abstract
+开/关本地视频发送。
+
+参数
+muted	发送本地视频流
+true：不发送本地视频流
+false：发送本地视频流（默认）
+注解
+调用该方法时，SDK 不再发送本地视频流，但摄像头仍然处于工作状态。相比于 enableLocalVideo (false) 用于控制本地视频流发送的方法，该方法响应速度更快。
+该方法不影响本地视频流获取，没有禁用摄像头。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ muteRemoteVideoStream()
+abstract int io.agora.rtc.RtcEngine.muteRemoteVideoStream	(	int 	uid,
+boolean 	muted 
+)		
+abstract
+接收/停止接收指定视频流。
+
+参数
+uid	指定的用户 ID
+muted	
+true：停止接收指定用户的视频流
+false：继续接收指定用户的视频流（默认）
+注解
+如果之前有调用过 muteAllRemoteVideoStreams (true) 停止接收所有远端视频流，在调用本 API 之前请确保你已调用 muteAllRemoteVideoStreams (false)。 muteAllRemoteVideoStreams 是全局控制，muteRemoteVideoStream 是精细控制。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ muteAllRemoteVideoStreams()
+abstract int io.agora.rtc.RtcEngine.muteAllRemoteVideoStreams	(	boolean 	muted	)	
+abstract
+接收/停止接收所有视频流。
+
+参数
+muted	
+true：停止接收所有远端视频流
+false：继续接收所有远端视频流（默认）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setDefaultMuteAllRemoteVideoStreams()
+abstract int io.agora.rtc.RtcEngine.setDefaultMuteAllRemoteVideoStreams	(	boolean 	muted	)	
+abstract
+设置是否默认接收视频流。
+
+参数
+muted	是否默认不接收所有远端视频流：
+true：默认不接收所有远端视频流
+false：默认继续接收所有远端视频流（默认）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setDefaultAudioRoutetoSpeakerphone()
+abstract int io.agora.rtc.RtcEngine.setDefaultAudioRoutetoSpeakerphone	(	boolean 	defaultToSpeaker	)	
+abstract
+设置默认的音频播放路由。
+
+该方法设置接收到的语音从听筒或扬声器出声。如果用户不调用本方法，则语音默认从听筒出声。 如果你想要在加入频道后修改语音路由，可以使用 setEnableSpeakerphone. 各频道模式下默认的语音路由：
+
+语音通话：听筒
+视频通话：外放 如果有用户在频道中使用 disableVideo、muteLocalVideoStream 或 muteAllRemoteVideoStreams 关闭视频，则语音路由会自动切换回听筒。
+直播：外放
+游戏语音：外放
+参数
+defaultToSpeaker	
+true：默认从外放（扬声器）出声
+false：默认从听筒出声
+注解
+该方法只在纯音频模式下工作，在有视频的模式下不工作。
+该方法需要在 joinChannel 前设置，否则不生效。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setEnableSpeakerphone()
+abstract int io.agora.rtc.RtcEngine.setEnableSpeakerphone	(	boolean 	enabled	)	
+abstract
+启用/关闭扬声器播放。 该方法设置是否将语音路由设到扬声器（外放）。 你可以在 setDefaultAudioRouteToSpeakerphone 方法中查看默认的语音路由。
+
+参数
+enabled	是否将音频路由到外放：
+true：切换到外放
+false：切换到听筒
+注解
+请确保在调用此方法前已调用过 joinChannel 方法。
+调用该方法后，SDK 将返回 onAudioRouteChanged 回调提示状态已更改。
+使用耳机的时候调用该方法不会生效。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ isSpeakerphoneEnabled()
+abstract boolean io.agora.rtc.RtcEngine.isSpeakerphoneEnabled	(		)	
+abstract
+检查扬声器状态启用状态。
+
+该方法检查扬声器是否已开启。
+
+返回
+true：扬声器已开启，语音会输出到扬声器
+false：扬声器未开启，语音会输出到非扬声器（听筒，耳机等）
+◆ enableInEarMonitoring()
+abstract int io.agora.rtc.RtcEngine.enableInEarMonitoring	(	boolean 	enabled	)	
+abstract
+开启耳返功能。
+
+该方法打开或关闭耳返功能。
+
+参数
+enabled	
+true：开启耳返功能
+false：关闭耳返功能(默认)
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setInEarMonitoringVolume()
+abstract int io.agora.rtc.RtcEngine.setInEarMonitoringVolume	(	int 	volume	)	
+abstract
+设置耳返音量。
+
+参数
+volume	设置耳返音量，取值范围在 0 到 100 间。默认值为 100。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ useExternalAudioDevice()
+abstract int io.agora.rtc.RtcEngine.useExternalAudioDevice	(		)	
+abstract
+使用外部音频设备。
+
+弃用:
+该方法已废弃。不建议你使用。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setLocalVoicePitch()
+abstract int io.agora.rtc.RtcEngine.setLocalVoicePitch	(	double 	pitch	)	
+abstract
+设置本地语音音调。
+
+该方法改变本地说话人声音的音调。
+
+参数
+pitch	语音频率。可以在 [0.5, 2.0] 范围内设置。取值越小，则音调越低。默认值为 1.0，表示不需要修改音调。
+返回
+0：方法调用成功
+-1：方法调用失败
+◆ setLocalVoiceEqualization()
+abstract int io.agora.rtc.RtcEngine.setLocalVoiceEqualization	(	int 	bandFrequency,
+int 	bandGain 
+)		
+abstract
+设置本地语音音效均衡。
+
+参数
+bandFrequency	频谱子带索引，取值范围是 [0-9]，分别代表 10 个频带，对应的中心频率是 [31，62，125，250，500，1k，2k，4k，8k，16k] Hz
+bandGain	每个 band 的增益，单位是 dB，每一个值的范围是 [-15，15]，默认值为 0
+返回
+0：方法调用成功
+-1：方法调用失败
+◆ setLocalVoiceReverb()
+abstract int io.agora.rtc.RtcEngine.setLocalVoiceReverb	(	int 	reverbKey,
+int 	value 
+)		
+abstract
+设置本地音效混响。
+
+参数
+reverbKey	混响音效 Key。该方法共有 5 个混响音效 Key，分别如 value 栏列出。
+value	各混响音效 Key 所对应的值：
+AUDIO_REVERB_DRY_LEVEL(0)：原始声音强度，即所谓的 dry signal，取值范围 [-20, 10]，单位为 dB
+AUDIO_REVERB_WET_LEVEL(1)：早期反射信号强度，即所谓的 wet signal，取值范围 [-20, 10]，单位为 dB
+AUDIO_REVERB_ROOM_SIZE(2)：所需混响效果的房间尺寸，一般房间越大，混响越强，取值范围 [0, 100]，单位为 dB
+AUDIO_REVERB_WET_DELAY(3)：Wet signal 的初始延迟长度，取值范围 [0, 200]，单位为毫秒
+AUDIO_REVERB_STRENGTH(4)：混响持续的强度，取值范围为 [0, 100]
+返回
+0：方法调用成功
+-1：方法调用失败
+◆ startAudioMixing()
+abstract int io.agora.rtc.RtcEngine.startAudioMixing	(	String 	filePath,
+boolean 	loopback,
+boolean 	replace,
+int 	cycle 
+)		
+abstract
+开始播放音乐文件及混音。
+
+该方法指定本地或在线音频文件来和麦克风采集的音频流进行混音或替换。替换是指用音频文件替换麦克风采集的音频流。该方法可以选择是否让对方听到本地播放的音频，并指定循环播放的次数。 调用本方法播放伴奏结束后，会收到 onAudioMixingFinished 回调。
+
+参数
+filePath	指定需要混音的本地或在线音频文件的绝对路径。支持的音频格式包括：mp3、mp4、m4a、aac、3gp、mkv、wav 及 flac。详见 Supported Media Formats。
+如果用户提供的目录以 /assets/ 开头，则去 assets 里面查找该文件
+如果用户提供的目录不是以 /assets/ 开头，一律认为是在绝对路径里查找该文件
+loopback	
+true：只有本地可以听到混音或替换后的音频流
+false：本地和对方都可以听到混音或替换后的音频流
+replace	
+true：只推动设置的本地音频文件或者线上音频文件，不传输麦克风收录的音频
+false：音频文件内容将会和麦克风采集的音频流进行混音
+cycle	指定音频文件循环播放的次数：
+正整数：循环的次数
+-1：无限循环
+注解
+如需调用该方法，请确保使用 Android 4.2 或以上设备，且 API Level ≥ 16。
+请在频道内调用该方法，如果在频道外调用该方法可能会出现问题。
+如果播放的是在线音乐文件，请确保重复调用该 API 的间隔超过 100 ms，否则 SDK 会返回 AUDIO_FILE_OPEN_TOO_FREQUENT = 702 警告码，表示音乐文件打开过于频繁。
+如果播放的是在线音乐文件，Agora 建议不要使用重定向地址。重定向地址在某些机型上可能会出现无法打开的情况。
+如果在模拟器上使用该 API，暂时只支持存放在 /sdcard/ 中的 mp3 文件。
+返回
+0：方法调用成功
+< 0：方法调用失败
+WARN_AUDIO_MIXING_OPEN_ERROR (701)：如果指定播放的音频文件不存在，或打开在线文件流后 5 秒内未收到网络流的数据包，则 SDK 会认为媒体文件不可访问，并返回该警告。
+◆ stopAudioMixing()
+abstract int io.agora.rtc.RtcEngine.stopAudioMixing	(		)	
+abstract
+停止播放音乐文件及混音。
+
+该方法停止播放伴奏。请在频道内调用该方法。
+
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ pauseAudioMixing()
+abstract int io.agora.rtc.RtcEngine.pauseAudioMixing	(		)	
+abstract
+暂停播放音乐文件及混音。
+
+该方法暂停播放伴奏。请在频道内调用该方法。
+
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ resumeAudioMixing()
+abstract int io.agora.rtc.RtcEngine.resumeAudioMixing	(		)	
+abstract
+恢复播放音乐文件及混音。
+
+该方法恢复混音，继续播放伴奏。请在频道内调用该方法。
+
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ adjustAudioMixingVolume()
+abstract int io.agora.rtc.RtcEngine.adjustAudioMixingVolume	(	int 	volume	)	
+abstract
+调节音乐文件的播放音量。
+
+该方法调节混音里伴奏在本端和远端播放的音量大小。请在频道内调用该方法。
+
+参数
+volume	伴奏音量范围为 0~100。默认 100 为原始文件音量
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ adjustAudioMixingPlayoutVolume()
+abstract int io.agora.rtc.RtcEngine.adjustAudioMixingPlayoutVolume	(	int 	volume	)	
+abstract
+调节音乐文件的本地播放音量。
+
+自从
+从 v2.3.2 起新增。
+该方法调节混音里音乐文件在本端播放的音量大小。请在频道内调用该方法。
+
+参数
+volume	伴奏音量范围为 0~100。默认 100 为原始文件音量
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ adjustAudioMixingPublishVolume()
+abstract int io.agora.rtc.RtcEngine.adjustAudioMixingPublishVolume	(	int 	volume	)	
+abstract
+调节音乐文件的远端播放音量。
+
+自从
+从 v2.3.2 起新增。
+该方法调节混音里音乐文件在远端播放的音量大小。请在频道内调用该方法。
+
+参数
+volume	伴奏音量范围为 0~100。默认 100 为原始文件音量
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ getAudioMixingDuration()
+abstract int io.agora.rtc.RtcEngine.getAudioMixingDuration	(		)	
+abstract
+获取音乐文件的时长。
+
+该方法获取音乐文件时长，单位为毫秒。请在频道内调用该方法。如果返回值 < 0，表明调用失败。
+
+返回
+< 0：方法调用失败
+其他：方法调用成功，并返回伴奏时长
+◆ getAudioMixingCurrentPosition()
+abstract int io.agora.rtc.RtcEngine.getAudioMixingCurrentPosition	(		)	
+abstract
+获取音乐文件的播放进度。
+
+该方法获取当前伴奏播放进度，单位为毫秒。请在频道内调用该方法。
+
+返回
+< 0：方法调用失败
+其它值：方法调用成功并返回伴奏播放进度
+◆ setAudioMixingPosition()
+abstract int io.agora.rtc.RtcEngine.setAudioMixingPosition	(	int 	pos	)	
+abstract
+设置音乐文件的播放位置。
+
+该方法可以设置音频文件的播放位置，这样你可以根据实际情况播放文件，而不是非得从头到尾播放一个文件。
+
+参数
+pos	整数。进度条位置，单位为毫秒
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ getAudioEffectManager()
+abstract IAudioEffectManager io.agora.rtc.RtcEngine.getAudioEffectManager	(		)	
+abstract
+获取 IAudioEffectManager 类，以管理音效文件。
+
+返回
+IAudioEffectManager
+◆ startAudioRecording()
+abstract int io.agora.rtc.RtcEngine.startAudioRecording	(	String 	filePath,
+int 	quality 
+)		
+abstract
+开始客户端录音。
+
+Agora SDK 支持通话过程中在客户端进行录音。该方法录制频道内所有用户的音频，并生成一个包含所有用户声音的录音文件，录音文件格式可以为：
+
+.wav：文件大，音质保真度高
+.aac：文件小，有一定的音质保真度损失
+请确保 App 里指定的目录存在且可写。该接口需在加入频道之后调用。如果调用 leaveChannel 时还在录音，录音会自动停止。
+
+参数
+filePath	录音文件的本地保存路径，由用户自行指定，需精确到文件名及格式，例如：/dir1/dir2/dir3/audio.aac
+quality	录音音质：
+AUDIO_RECORDING_QUALITY_LOW(0)：低音质
+AUDIO_RECORDING_QUALITY_MEDIUM(1)：中音质
+AUDIO_RECORDING_QUALITY_HIGH(2)：高音质
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_REFUSED(-5)：无法启动测试，可能没有成功初始化
+◆ stopAudioRecording()
+abstract int io.agora.rtc.RtcEngine.stopAudioRecording	(		)	
+abstract
+停止客户端录音。
+
+该方法停止录音。该接口需要在 leaveChannel 之前调用，不然会在调用 leaveChannel 时自动停止。
+
+返回
+0： 方法调用成功
+<0： 方法调用失败
+ERR_REFUSED(-5)：无法启动测试，可能没有成功初始化
+◆ startEchoTest()
+abstract int io.agora.rtc.RtcEngine.startEchoTest	(		)	
+abstract
+开始语音通话回路测试。
+
+该方法启动语音通话测试，目的是测试系统的音频设备（耳麦、扬声器等）和网络连接是否正常。在测试过程中，用户先说一段话，在 10 秒后，声音会回放出来。如果 10 秒后用户能正常听到自己刚才说的话，就表示系统音频设备和网络连接都是正常的。
+
+注解
+调用 startEchoTest 后必须调用 stopEchoTest 以结束测试，否则不能进行下一次回声测试，或者调用 joinchannel 进行通话。
+直播模式下，该方法仅能由用户角色为主播的用户调用。如果用户由通信模式切换到直播模式，请务必调用 setClientRole 方法将用户角色设置为主播后再调用该方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_REFUSED(-5)：无法启动测试，可能没有成功初始化
+◆ stopEchoTest()
+abstract int io.agora.rtc.RtcEngine.stopEchoTest	(		)	
+abstract
+停止语音通话回路测试。
+
+返回
+0： 方法调用成功
+<0： 方法调用失败
+ERR_REFUSED(-5)：无法启动测试，可能没有成功初始化
+◆ enableLastmileTest()
+abstract int io.agora.rtc.RtcEngine.enableLastmileTest	(		)	
+abstract
+启用网络测试。
+
+该方法启用网络连接质量测试，用于检测用户网络接入质量。默认该功能为关闭状态。该方法主要用于以下两种场景：
+
+用户加入频道前，可以调用该方法判断和预测目前的上行网络质量是否足够好。
+直播模式下，当用户角色想由观众切换为主播时，可以调用该方法判断和预测目前的上行网络质量是否足够好。
+无论哪种场景，启用该方法会消耗一定的网络流量，影响通话质量。在收到 onLastmileQuality 回调后须调用 disableLastmileTest 停止测试，再加入频道。
+
+注解
+调用该方法后，在收到 onLastmileQuality 回调之前请不要调用其他方法，否则可能会由于 API 操作过于频繁导致此回调无法执行。
+直播模式下，如果本地用户为主播，请勿调用该方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ disableLastmileTest()
+abstract int io.agora.rtc.RtcEngine.disableLastmileTest	(		)	
+abstract
+禁用网络测试。
+
+该方法启用网络连接质量测试，用于检测用户网络接入质量。默认该功能为关闭状态。该方法主要用于以下两种场景：
+
+用户加入频道前，可以调用该方法判断和预测目前的上行网络质量是否足够好。
+直播模式下，当用户角色想由观众切换为主播时，可以调用该方法判断和预测目前的上行网络质量是否足够好。
+无论哪种场景，启用该方法会消耗一定的网络流量，影响通话质量。在收到 onLastmileQuality 回调后须调用 disableLastmileTest 停止测试，再加入频道。
+
+注解
+调用该方法后，在收到 onLastmileQuality 回调之前请不要调用其他方法，否则可能会由于 API 操作过于频繁导致此回调无法执行。
+直播模式下，如果本地用户为主播，请勿调用该方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setVideoSource()
+abstract int io.agora.rtc.RtcEngine.setVideoSource	(	IVideoSource 	source	)	
+abstract
+设置自定义视频源。
+
+实时通讯过程中，Agora SDK 通常会启动默认的视频输入设备，即内置的摄像头，进行视频推流。当需要自定义视频设备时，App 可以先通过 IVideoSource 接口自定义视频源，然后调用该方法将自定义的视频源加入到 SDK 中。
+
+参数
+source	自定义的视频源。详细定义见 IVideoSource
+◆ setLocalVideoRenderer()
+abstract int io.agora.rtc.RtcEngine.setLocalVideoRenderer	(	IVideoSink 	render	)	
+abstract
+自定义本地视频渲染器。
+
+该方法设置本地视频渲染器。实时通讯过程中，Agora SDK 通常会启动默认的视频渲染器进行视频渲染。当需要自定义视频渲染设备时，App 可以先通过 IVideoSink 自定义渲染器，然后调用该方法将视频渲染器加入到 SDK 中。
+
+参数
+render	自定义的本地视频渲染器。详细定义见 IVideoSink
+◆ setRemoteVideoRenderer()
+abstract int io.agora.rtc.RtcEngine.setRemoteVideoRenderer	(	int 	uid,
+IVideoSink 	render 
+)		
+abstract
+自定义远端视频渲染器。
+
+该方法设置远端视频渲染器。实时通讯过程中，Agora SDK 通常会启动默认的视频渲染器进行视频渲染。当需要自定义视频渲染设备时，App 可以先通过 IVideoSink 自定义渲染器，然后调用该方法将视频渲染器加入到 SDK 中。
+
+参数
+uid	远端用户 ID
+render	自定义的远端视频渲染器。详细定义见 IVideoSink
+◆ setExternalAudioSource()
+abstract int io.agora.rtc.RtcEngine.setExternalAudioSource	(	boolean 	enabled,
+int 	sampleRate,
+int 	channels 
+)		
+abstract
+设置外部音频采集参数。
+
+参数
+enabled	
+true：开启外部音频采集
+false：关闭外部音频采集（默认）
+sampleRate	外部音频源的采样率，可设置为 8000，16000，32000，44100 或 48000
+channels	外部音频源的通道数（最多支持两个声道）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ pushExternalAudioFrame()
+abstract int io.agora.rtc.RtcEngine.pushExternalAudioFrame	(	byte [] 	data,
+long 	timestamp 
+)		
+abstract
+推送外部音频帧。
+
+参数
+data	外部音频数据
+timestamp	外部音频帧的时间戳，用于和外部视频源同步
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setExternalVideoSource()
+abstract void io.agora.rtc.RtcEngine.setExternalVideoSource	(	boolean 	enable,
+boolean 	useTexture,
+boolean 	pushMode 
+)		
+abstract
+配置外部视频源。
+
+参数
+enable	是否使用外部视频源：
+true：使用外部视频源
+false：不使用外部视频源（默认）
+useTexture	是否使用 Texture 作为输入：
+true：使用 texture 作为输入
+false：不使用 texture 作为输入
+pushMode	是否外部视频源需要调用 PushExternalVideoFrame 将视频帧主动推送给 Agora SDK：
+true：使用推送（push）模式
+false：使用拉取（pull）模式（暂不支持）
+◆ pushExternalVideoFrame()
+abstract boolean io.agora.rtc.RtcEngine.pushExternalVideoFrame	(	AgoraVideoFrame 	frame	)	
+abstract
+推送外部视频帧。
+
+该方法主动将视频帧数据用 AgoraVideoFrame 类封装后传递给 SDK。请确保在你调用本方法前已调用 setExternalVideoSource，并将参数 pushMode 设为 true，不然调用本方法后会一直报错。
+
+参数
+frame	视频帧的数据信息。详细定义见 Agora Video Frame
+注解
+在通信模式下，不支持 Texture 格式的视频帧，只支持非 Texture 格式的视频帧。
+返回
+true：该帧推送成功
+false：该帧推送不成功
+◆ isTextureEncodeSupported()
+abstract boolean io.agora.rtc.RtcEngine.isTextureEncodeSupported	(		)	
+abstract
+检查视频是否支持 Texture 编码。
+
+返回
+true：支持 Texture 编码
+false：不支持 Texture 编码
+◆ registerAudioFrameObserver()
+abstract int io.agora.rtc.RtcEngine.registerAudioFrameObserver	(	IAudioFrameObserver 	observer	)	
+abstract
+注册语音观测器对象。
+
+该方法用于注册语音观测器对象，即注册回调。当需要引擎给出 onRecordFrame 或 onPlaybackFrame 回调时，需要使用该方法注册回调。
+
+参数
+observer	IAudioFrameObserver 接口对象实例。如果传入 null，则取消注册。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setRecordingAudioFrameParameters()
+abstract int io.agora.rtc.RtcEngine.setRecordingAudioFrameParameters	(	int 	sampleRate,
+int 	channel,
+int 	mode,
+int 	samplesPerCall 
+)		
+abstract
+设置录制的声音格式。
+
+该方法设置 onRecordFrame 回调数据的格式。
+
+参数
+sampleRate	指定 onRecordFrame 中返回数据的采样率，可设置为 8000，16000，32000，44100 或 48000。
+channel	指定 onRecordFrame 中返回数据的通道数，可设置为 1 或 2：
+1：单声道
+2：双声道
+mode	指定 onRecordFrame 的使用模式：
+RAW_AUDIO_FRAME_OP_MODE_READ_ONLY(0)：只读模式，用户仅从 AudioFrame 获取原始音频数据。例如：若用户通过 Agora SDK 采集数据，自己进行 RTMP 推流，则可以选择该模式。
+RAW_AUDIO_FRAME_OP_MODE_WRITE_ONLY(1)：只写模式，用户替换 AudioFrame 中的数据以供 Agora SDK 编码传输。例如：若用户自行采集数据，可选择该模式。
+RAW_AUDIO_FRAME_OP_MODE_READ_WRITE(2)：读写模式，用户从 AudioFrame 获取并修改数据，并返回给 Aogra SDK 进行编码传输。例如：若用户自己有音效处理模块，且想要根据实际需要对数据进行前处理 (例如变声)，则可以选择该模式。
+samplesPerCall	指定 onRecordFrame 中返回数据的采样点数，如 RTMP 推流应用中通常为 1024。 SamplesPerCall = (int)(SampleRate × sampleInterval)，其中：sample ≥ 0.01，单位为秒。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setPlaybackAudioFrameParameters()
+abstract int io.agora.rtc.RtcEngine.setPlaybackAudioFrameParameters	(	int 	sampleRate,
+int 	channel,
+int 	mode,
+int 	samplesPerCall 
+)		
+abstract
+设置播放的声音格式。
+
+该方法设置 onPlaybackFrame 回调数据的格式。
+
+参数
+sampleRate	指定 onPlaybackFrame 中返回数据的采样率，可设置为 8000，16000，32000，44100 或 48000
+channel	指定 onPlaybackFrame 中返回数据的通道数，可设置为 1 或 2：
+1：单声道
+2：双声道
+mode	指定 onPlaybackFrame 的使用模式：
+RAW_AUDIO_FRAME_OP_MODE_READ_ONLY(0)：只读模式，用户仅从 AudioFrame 获取原始音频数据，不作任何修改。例如：若用户通过 Agora SDK 采集数据，自己进行 RTMP 推流，则可以选择该模式。
+RAW_AUDIO_FRAME_OP_MODE_WRITE_ONLY(1)：只写模式，用户替换 AudioFrame 中的数据。例如：若用户自行采集数据，可选择该模式。
+RAW_AUDIO_FRAME_OP_MODE_READ_WRITE(2)：读写模式，用户从 AudioFrame 获取数据、修改。例如：若用户自己有音效处理模块，且想要根据实际需要对数据进行后处理 (例如变声)，则可以选择该模式。
+samplesPerCall	指定 onPlaybackFrame 中返回数据的采样点数，如 RTMP 推流应用中通常为 1024。 SamplesPerCall = (int)(SampleRate × sampleInterval)，其中：sample ≥ 0.01，单位为秒。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setMixedAudioFrameParameters()
+abstract int io.agora.rtc.RtcEngine.setMixedAudioFrameParameters	(	int 	sampleRate,
+int 	samplesPerCall 
+)		
+abstract
+设置录制和播放声音混音后的数据格式。
+
+该方法设置 onMixedAudioFrame 回调数据的格式。
+
+参数
+sampleRate	指定 onMixedAudioFrame 中返回数据的采样率，可设置为 8000，16000，32000，44100 或 48000
+samplesPerCall	指定 onMixedAudioFrame 中返回数据的采样点数，如 RTMP 推流应用中通常为 1024。 SamplesPerCall = (int)(SampleRate × sampleInterval)，其中：sample ≥ 0.01，单位为秒。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ addVideoWatermark()
+abstract int io.agora.rtc.RtcEngine.addVideoWatermark	(	AgoraImage 	watermark	)	
+abstract
+添加本地视频水印。
+
+该方法将一张 PNG 图片作为水印添加到本地发布的直播视频流上，同一直播频道中的观众，旁路直播观众，甚至录制设备都能看到或采集到该水印图片。 如果你仅仅希望在旁路直播推流中添加水印，请参考 设置直播转码 setLiveTranscoding 中描述的用法。
+
+参数
+watermark	待添加在本地直播推流中的水印图片，详细定义见 Agora Image
+注解
+在本地直播和旁路直播中，URL 的定义不同。本地直播中，URL 指本地直播视频上图片的本地绝对路径；旁路直播中，URL 指旁路直播视频上图片的地址。
+待添加图片的源文件格式必须是 PNG。如果待添加的 PNG 图片的尺寸与你该方法中设置的尺寸不一致，SDK 会对 PNG 图片进行裁剪，以与设置相符。
+Agora 当前只支持在直播视频流中添加一个水印，后添加的水印会替换掉之前添加的水印。
+如果你在 setVideoEncoderConfiguratio 方法中将 orientationMode 设置为 ADAPTIVE 模式，则如果视频帧在播放端发生旋转，水印也会以其左上角为坐标原点，跟着视频帧旋转。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ clearVideoWatermarks()
+abstract int io.agora.rtc.RtcEngine.clearVideoWatermarks	(		)	
+abstract
+删除本地视频水印。 该方法删除使用 addVideoWatermark 方法添加的本地视频水印。
+
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setLocalPublishFallbackOption()
+abstract int io.agora.rtc.RtcEngine.setLocalPublishFallbackOption	(	int 	option	)	
+abstract
+设置弱网条件下发布的音视频流回退选项。
+
+网络不理想的环境下，直播音视频的质量都会下降。使用该接口并将 option 设置为 STREAM_FALLBACK_OPTION_AUDIO_ONLY(2) 后，SDK 会在上行弱网且音视频质量严重受影响时，自动关断视频流，从而保证或提高音频质量。同时 SDK 会持续监控网络质量，并在网络质量改善时恢复音视频流。当本地推流回退为音频流时，或由音频流恢复为音视频流时，SDK 会触发 本地发布的媒体流已回退为音频流 onLocalPublishFallbackToAudioOnly 回调。
+
+参数
+option	本地推流回退处理选项：
+STREAM_FALLBACK_OPTION_DISABLED(0)：（默认）上行网络较弱时，不对音视频流作回退处理，但不能保证音视频流的质量
+STREAM_FALLBACK_OPTION_AUDIO_ONLY(2)：上行网络较弱时只发布音频流
+注解
+旁路推流场景下，设置本地推流回退为 Audio-only 可能会导致远端的 CDN 用户听到声音的时间有所延迟。因此在有旁路推流的场景下，Agora 建议不开启该功能。
+返回
+0：方法调用成功
+<0：方法调用失败
+◆ setRemoteSubscribeFallbackOption()
+abstract int io.agora.rtc.RtcEngine.setRemoteSubscribeFallbackOption	(	int 	option	)	
+abstract
+设置弱网条件下订阅的音视频流回退选项。
+
+网络不理想的环境下，直播音视频的质量都会下降。使用该接口并将 option 设置为 STREAM_FALLBACK_OPTION_VIDEO_STREAM_LOW(1) 或者 STREAM_FALLBACK_OPTION_AUDIO_ONLY(2) 后，SDK 会在下行弱网且音视频质量严重受影响时， 将视频流切换为小流，或关断视频流，从而保证或提高音频质量。同时 SDK 会持续监控网络质量，并在网络质量改善时恢复音视频流。当远端订阅流回退为音频流时，或由音频流恢复为音视频流时，SDK 会触发 远端订阅流已回退为音频流 onRemoteSubscribeFallbackToAudioOnly 回调。
+
+参数
+option	远端订阅流回退处理选项：
+STREAM_FALLBACK_OPTION_DISABLED(0)：下行网络较弱时，不对音视频流作回退处理，但不能保证音视频流的质量
+STREAM_FALLBACK_OPTION_VIDEO_STREAM_LOW(1)：（默认）下行网络较弱时只接收视频小流。该选项只对该方法有效，对 setLocalPublishFallbackOption 方法无效
+STREAM_FALLBACK_OPTION_AUDIO_ONLY(2)：下行网络较弱时，先尝试只接收视频小流；如果网络环境无法显示视频，则再回退到只接收远端订阅的音频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ enableDualStreamMode()
+abstract int io.agora.rtc.RtcEngine.enableDualStreamMode	(	boolean 	enabled	)	
+abstract
+开/关视频双流模式。
+
+该方法设置单流（默认）或者双流模式。发送端开启双流模式后，接收端可以选择接收大流还是小流。其中，大流指高分辨率、高码率的视频流，小流指低分辨率、低码率的视频流。
+
+参数
+enabled	指定双流或者单流模式：
+true：双流
+false：单流（默认）
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setRemoteVideoStreamType()
+abstract int io.agora.rtc.RtcEngine.setRemoteVideoStreamType	(	int 	uid,
+int 	streamType 
+)		
+abstract
+设置订阅的视频流类型。
+
+如果发送端选择发送视频双流（大流或小流），接收端可以选择接收大流还是小流。其中大流可以理解为高分辨率高码率的视频流，小流则是低分辨率低码率的视频流。该方法可以根据视频窗口的大小动态调整对应视频流的大小，以节约带宽和计算资源。
+
+如果发送端用户已调用 enableDualStreamMode 启用了双流模式，SDK 默认接收大流。如需使用小流，可调用本方法进行切换。
+如果发送端用户未启用双流模式，SDK 默认接收大流。
+调用本方法的执行结果将在 onApiCallExecuted 中返回。 视频小流默认的宽高比和视频大流的宽高比一致。根据当前大流的宽高比，系统会自动分配小流的分辨率、帧率及码率。
+
+参数
+uid	用户 ID
+streamType	设置视频流大小。视频流类型如下：
+High video stream(0)：视频大流，即高分辨率、高码率视频流
+Low video stream(1)：视频小流，即低分辨率、低码率视频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setRemoteDefaultVideoStreamType()
+abstract int io.agora.rtc.RtcEngine.setRemoteDefaultVideoStreamType	(	int 	streamType	)	
+abstract
+设置默认订阅的视频流类型。
+
+参数
+streamType	设置视频流大小。视频流类型如下：
+High video stream(0)：视频大流，即高分辨率、高码率视频流
+Low video stream(1)：视频小流，即低分辨率、低码率视频流
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setEncryptionSecret()
+abstract int io.agora.rtc.RtcEngine.setEncryptionSecret	(	String 	secret	)	
+abstract
+启用内置加密，并设置数据加密密钥。
+
+在加入频道之前，App 需调用 setEncryptionSecret 指定 secret 来启用内置的加密功能，同一频道内的所有用户应设置相同的 secret。 当用户离开频道时，该频道的 secret 会自动清除。如果未指定 secret 或将 secret 设置为空，则无法激活加密功能。
+
+参数
+secret	加密密钥
+注解
+请勿在转码推流场景中使用该方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setEncryptionMode()
+abstract int io.agora.rtc.RtcEngine.setEncryptionMode	(	String 	encryptionMode	)	
+abstract
+设置内置的加密方案。
+
+Agora Native SDK 支持内置加密功能，默认使用 AES-128-XTS 加密方式。如需使用其他加密方式，可以调用该 API 设置。 同一频道内的所有用户必须设置相同的加密方式和 secret 才能进行通话。关于这几种加密方式的区别，请参考 AES 加密算法的相关资料。
+
+参数
+encryptionMode	加密方式。目前支持以下几种：
+“aes-128-xts”：128 位 AES 加密，XTS 模式
+“aes-128-ecb”：128 位 AES 加密，ECB 模式
+“aes-256-xts”：256 位 AES 加密，XTS 模式
+“”：设置为空字符串时，默认使用加密方式 “aes-128-xts”
+注解
+在调用本方法前，请先调用 setEncryptionSecret 启用内置加密功能。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ addInjectStreamUrl()
+abstract int io.agora.rtc.RtcEngine.addInjectStreamUrl	(	String 	url,
+LiveInjectStreamConfig 	config 
+)		
+abstract
+导入在线媒体流。 该方法通过在服务端拉取视频流并发送到频道中，将正在播出的视频导入到正在进行的直播中。可主要应用于赛事直播、多人看视频互动等直播场景。 状态回调为 onStreamPublished。 如果导入成功，该音视频流会出现在频道中，并收到 onUserJoined 和 onFirstRemoteVideoDecoded 回调，其中 uid 为 666。
+
+参数
+url	添加到直播中的视频流 URL 地址，支持 RTMP， HLS， FLV 协议传输。
+支持的 FLV 音频编码格式：AAC
+支持的 FLV 视频编码格式：H264 (AVC)
+config	外部导入的音视频流的配置，详细定义见 Live Inject Stream Configuration
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_INVALID_ARGUMENT(2)：输入的 URL 为空。请重新调用该方法，并确认输入的媒体流的 URL 是有效的
+ERR_NOT_INITIALIZED(7)：引擎没有初始化。请确认调用该方法前已创建 RtcEngine 对象并完成初始化
+ERR_NOT_SUPPORTED(4)：频道非直播模式。请调用 setChannelProfile 并将频道设置为直播模式再调用该方法
+ERR_NOT_READY(3)：用户没有加入频道
+◆ removeInjectStreamUrl()
+abstract int io.agora.rtc.RtcEngine.removeInjectStreamUrl	(	String 	url	)	
+abstract
+删除导入的在线媒体流。
+
+成功删除后，会触发 onUserOffline 回调，其中 uid 为 666。
+
+参数
+url	已导入、待删除的外部视频流 URL 地址，格式为 HTTP 或 HTTPS
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ addPublishStreamUrl()
+abstract int io.agora.rtc.RtcEngine.addPublishStreamUrl	(	String 	url,
+boolean 	transcodingEnabled 
+)		
+abstract
+增加旁路推流地址。
+
+该方法用于在旁路推流中，添加推流地址。会触发回调 onStreamPublished。
+
+参数
+url	推流地址，格式为 RTMP
+transcodingEnabled	是否转码
+true：转码。转码是指在旁路推流时对音视频流进行转码处理后，再推送到其他 RTMP 服务器。多适用于频道内有多个主播，需要进行混流、合图的场景
+false：不转码
+注解
+请确保在成功加入房间后才能调用该接口。
+该方法每次只能增加一路旁路推流地址。若需推送多路流，则需多次调用该方法。
+推流地址不支持中文等特殊字符。
+请在 setLiveTranscoding 方法后调用该方法。
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_INVALID_ARGUMENT(2)：参数无效，一般是 URL 为空或是长度为 0 的字符串
+ERR_NOT_INITIALIZED(7)：推流时未初始化引擎
+◆ removePublishStreamUrl()
+abstract int io.agora.rtc.RtcEngine.removePublishStreamUrl	(	String 	url	)	
+abstract
+删除旁路推流地址。
+
+该方法用于删除旁路推流过程中已经设置的推流地址，格式为 HTTP/HTTPS。
+
+参数
+url	推流地址
+注解
+该方法每次只能删除一路旁路推流地址。若需删除多路流，则需多次调用该方法
+推流地址不支持中文等特殊字符
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setLiveTranscoding()
+abstract int io.agora.rtc.RtcEngine.setLiveTranscoding	(	LiveTranscoding 	transcoding	)	
+abstract
+设置直播转码。
+
+该方法用于旁路推流的视图布局及音频设置等。
+
+参数
+transcoding	旁路推流布局相关设置，详细定义见 LiveTranscoding
+注解
+在调用该 API 前：
+请确保已联系 sales@agora.io 开通旁路直播推流功能。
+请确保已调用 setClientRole 并将用户角色设为主播。
+请确保先调用过该方法，再调用 addPublishStreamUrl。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ configPublisher()
+abstract int io.agora.rtc.RtcEngine.configPublisher	(	PublisherConfiguration 	config	)	
+abstract
+配置旁路直播推流。
+
+弃用:
+该方法已废弃。不建议你使用。如果你希望配置旁路直播推流，请调用如下方法：
+addPublishStreamUrl
+removePublishStreamUrl
+setLiveTranscoding
+该方法用于在加入频道前为引擎创建一份推流设置。我们提供一个 Builder 类方便配置旁路直播推流，例如：Builder Class。
+
+参数
+config	旁路直播推流的相关配置。详细定义见 PublisherConfiguration
+注解
+关于如何调用 Builder 类里的各方法，配置推流设置，详见 Builder 类。
+请确保设置的分辨率、码率和帧率与主播上行设置一致，以免视频质量下降。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setVideoCompositingLayout()
+abstract int io.agora.rtc.RtcEngine.setVideoCompositingLayout	(	VideoCompositingLayout 	layout	)	
+abstract
+设置画中画布局。
+
+弃用:
+该方法已废弃。不建议你使用。如果你希望设置画中画布局，请改用 setLiveTranscoding 方法。
+该方法设置直播场景里的画中画布局。该方法仅适用于在 Agora 服务器端推流的场景。当您在服务器端进行推流时：
+
+定义一个画布（canvas）：画布的宽和高（即视频的分辨率），背景颜色，和您想在屏幕上显示的视频总数。
+在画布上定义每个视频的位置和尺寸（无论画布定义的宽和高有多大，每个视频用 0 到 1 的相对位置和尺寸进行定义），图片所在的图层，图片的透明度，视频是经过裁减的还是缩放到合适大小等等。
+服务端推流程序在生成 H.264 视频流并通过 RTMP 协议推送给 CDN 服务商时，会将自定义布局的详细信息格式化为 JSON 字符串，打包到在每个关键帧的 SEI 信息中，SEI 的类型为 100。
+
+参数
+layout	VideoCompositingLayout
+注解
+请确保在频道内调用该方法。
+App 需保证同一频道内仅有一人调用该方法，如果同一频道内有多人调用该方法，其他调用了该方法的用户需调用 clearVideoCompositingLayout 取消已设置的画中画布局，仅留一人保留布局设置。
+◆ clearVideoCompositingLayout()
+abstract int io.agora.rtc.RtcEngine.clearVideoCompositingLayout	(		)	
+abstract
+删除画中画布局。
+
+弃用:
+该方法已废弃。不建议你使用。
+该方法删除使用 setVideoCompositingLayout 方法设置的画中画布局。
+
+◆ createDataStream()
+abstract int io.agora.rtc.RtcEngine.createDataStream	(	boolean 	reliable,
+boolean 	ordered 
+)		
+abstract
+创建数据流。
+
+该方法用于创建数据流。频道内每人最多只能创建 5 个数据流。频道内数据通道最多允许数据延迟 5 秒，若超过 5 秒接收方尚未收到数据流，则数据通道会向 App 报错。
+
+参数
+reliable	
+true：接收方 5 秒内会收到发送方所发送的数据，否则会收到 onStreamMessageError 回调并获得相应报错信息。
+false：接收方不保证收到，就算数据丢失也不会报错。
+ordered	
+true：接收方 5 秒内会按照发送方发送的顺序收到数据包。
+false：接收方不保证按照发送方发送的顺序收到数据包。
+注解
+请将 reliable 和 ordered 同时设置为 true 或 false，暂不支持交叉设置。
+返回
+创建数据流成功则返回数据流 ID
+< 0：创建数据流失败。如果返回的错误码是负数，对应错误代码和警告代码里的正整数。例如返回的错误码为 -2，则对应错误代码和警告代码里的 2: ERR_INVALID_ARGUMENT(-2)。
+◆ sendStreamMessage()
+abstract int io.agora.rtc.RtcEngine.sendStreamMessage	(	int 	streamId,
+byte [] 	message 
+)		
+abstract
+发送数据流。
+
+该方法发送数据流消息到频道内所有用户。SDK 对该方法的实现进行了如下限制：频道内每秒最多能发送 30 个包，且每个包最大为 1 KB。 每个客户端每秒最多能发送 6 KB 数据。频道内每人最多能同时有 5 个数据通道。
+
+参数
+streamId	数据流 ID，createDataStream 的返回值。
+message	待发送的数据。
+注解
+该方法仅适用于通信模式以及直播模式下的主播用户，如果直播模式下的观众调用此方法可能会造成观众变主播。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setVideoQualityParameters()
+abstract int io.agora.rtc.RtcEngine.setVideoQualityParameters	(	boolean 	preferFrameRateOverImageQuality	)	
+abstract
+设置视频优化选项（仅适用于直播）。
+
+该方法允许用户设置视频的优化选项。
+
+参数
+preferFrameRateOverImageQuality	支持两种优化选项：
+true：画质和流畅度里，优先保证流畅度
+false：画质和流畅度里，优先保证画质 (默认)
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ getRecommendedEncoderType()
+static int io.agora.rtc.RtcEngine.getRecommendedEncoderType	(		)	
+static
+获取推荐的编码器类型。
+
+弃用:
+该方法已废弃。不建议你使用。
+返回
+编码器类型：
+HARDWARE_ENCODER(0)：硬件编码器。
+SOFTWARE_ENCODER(1)：软件编码器。
+◆ setLocalVideoMirrorMode()
+abstract int io.agora.rtc.RtcEngine.setLocalVideoMirrorMode	(	int 	mode	)	
+abstract
+设置本地视频镜像。
+
+该方法设置本地视频镜像，须在开启本地预览前设置。如果在开启预览后设置，需要重新开启预览才能生效。
+
+参数
+mode	设置本地视频镜像模式
+VIDEO_MIRROR_MODE_AUTO(0)：默认镜像模式，即由 SDK 决定镜像模式
+VIDEO_MIRROR_MODE_ENABLED(1)：启用镜像模式
+VIDEO_MIRROR_MODE_DISABLED(2)：关闭镜像模式
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ switchCamera()
+abstract int io.agora.rtc.RtcEngine.switchCamera	(		)	
+abstract
+切换前置/后置摄像头。
+
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ isCameraZoomSupported()
+abstract boolean io.agora.rtc.RtcEngine.isCameraZoomSupported	(		)	
+abstract
+检测设备是否支持摄像头缩放功能。
+
+返回
+true：设备支持相机缩放功能
+false：设备不支持相机缩放功能
+◆ isCameraTorchSupported()
+abstract boolean io.agora.rtc.RtcEngine.isCameraTorchSupported	(		)	
+abstract
+检测设备是否支持闪光灯常开。
+
+注解
+一般情况下，App 默认开启前置摄像头，因此如果你的前置摄像头不支持闪光灯常开，直接使用该方法会返回 false。如果需要检查后置摄像头是否支持闪光灯常开，需要先使用 switchCamera 切换摄像头，再使用该方法。
+返回
+true：设备支持闪光灯常开
+false：设备不支持闪光灯常开
+◆ isCameraFocusSupported()
+abstract boolean io.agora.rtc.RtcEngine.isCameraFocusSupported	(		)	
+abstract
+检测设备是否支持手动对焦功能。
+
+返回
+true：设备支持手动对焦功能
+false：设备不支持手动对焦功能
+◆ isCameraExposurePositionSupported()
+abstract boolean io.agora.rtc.RtcEngine.isCameraExposurePositionSupported	(		)	
+abstract
+检测设备是否支持手动曝光功能。
+
+自从
+从 v2.3.2 起新增。
+返回
+true：设置支持手动曝光功能
+false：设备不支持手动曝光功能
+◆ isCameraAutoFocusFaceModeSupported()
+abstract boolean io.agora.rtc.RtcEngine.isCameraAutoFocusFaceModeSupported	(		)	
+abstract
+检测设备是否支持人脸对焦功能。
+
+返回
+true：设备支持人脸对焦功能
+false：设备不支持人脸对焦功能
+◆ setCameraZoomFactor()
+abstract int io.agora.rtc.RtcEngine.setCameraZoomFactor	(	float 	factor	)	
+abstract
+设置摄像头缩放比例。
+
+参数
+factor	相机缩放比例，有效范围从 1.0 到最大缩放
+返回
+方法调用成功：返回设置的 Factor 值
+方法调用失败：返回值 < 0
+◆ getCameraMaxZoomFactor()
+abstract float io.agora.rtc.RtcEngine.getCameraMaxZoomFactor	(		)	
+abstract
+获取摄像头支持最大缩放比例。
+
+返回
+该相机支持的最大缩放比例。
+◆ setCameraFocusPositionInPreview()
+abstract int io.agora.rtc.RtcEngine.setCameraFocusPositionInPreview	(	float 	positionX,
+float 	positionY 
+)		
+abstract
+设置手动对焦位置，并触发对焦。
+
+参数
+positionX	触摸点相对于视图的横坐标
+positionY	触摸点相对于视图的纵坐标
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setCameraExposurePosition()
+abstract int io.agora.rtc.RtcEngine.setCameraExposurePosition	(	float 	positionXinView,
+float 	positionYinView 
+)		
+abstract
+设置手动曝光位置。
+
+自从
+从 v2.3.2 起新增。
+参数
+positionXinView	触摸点相对于视图的横坐标
+positionYinView	触摸点相对于视图的纵坐标
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setCameraTorchOn()
+abstract int io.agora.rtc.RtcEngine.setCameraTorchOn	(	boolean 	isOn	)	
+abstract
+设置是否打开闪光灯。
+
+参数
+isOn	是否打开闪光灯
+true：打开
+false：关闭
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setCameraAutoFocusFaceModeEnabled()
+abstract int io.agora.rtc.RtcEngine.setCameraAutoFocusFaceModeEnabled	(	boolean 	enabled	)	
+abstract
+设置是否开启人脸对焦功能。
+
+参数
+enabled	
+true：开启人脸对焦功能
+false：关闭人脸对焦功能（默认）
+◆ getCallId()
+abstract String io.agora.rtc.RtcEngine.getCallId	(		)	
+abstract
+获取通话 ID。
+
+获取当前的通话 ID。客户端在每次 RtcEngine#joinChannel(String, String, String, int) joinChannel} 后会生成一个对应的 CallId，标识该客户端的此次通话。有些方法如 rate, complain 需要在通话结束后调用，向 SDK 提交反馈，这些方法必须指定 CallId 参数。使用这些反馈方法，需要在通话过程中调用 getCallId 方法获取 CallId，在通话结束后在反馈方法中作为参数传入。
+
+返回
+通话 ID。
+◆ rate()
+abstract int io.agora.rtc.RtcEngine.rate	(	String 	callId,
+int 	rating,
+String 	description 
+)		
+abstract
+给通话评分。
+
+参数
+callId	通过 getCallId 函数获取的通话 ID
+rating	给通话的评分，最低 1 分，最高 5 分，如超过这个范围，SDK 会返回 ERR_INVALID_ARGUMENT(-2) 错误
+description	（非必选项）给通话的描述，可选，长度应小于 800 字节
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_INVALID_ARGUMENT(-2)
+ERR_NOT_READY(-3)
+◆ complain()
+abstract int io.agora.rtc.RtcEngine.complain	(	String 	callId,
+String 	description 
+)		
+abstract
+投诉通话质量。
+
+该方法让用户就通话质量进行投诉。一般在通话结束后调用。
+
+参数
+callId	通话 getCallId 函数获取的通话 ID
+description	（非必选项）给通话的描述，可选，长度应小于 800 字节
+返回
+0：方法调用成功
+< 0：方法调用失败
+ERR_INVALID_ARGUMENT(-2)
+ERR_NOT_READY(-3)
+◆ getSdkVersion()
+static String io.agora.rtc.RtcEngine.getSdkVersion	(		)	
+static
+查询 SDK 版本号。
+
+返回
+当前的 SDK 版本号，格式为字符串，如 2.3.0。
+◆ getMediaEngineVersion()
+static String io.agora.rtc.RtcEngine.getMediaEngineVersion	(		)	
+static
+返回媒体引擎版本号。
+
+弃用:
+该方法已废弃。不建议你使用。
+返回
+char 格式的版本号字符串
+◆ setLogFile()
+abstract int io.agora.rtc.RtcEngine.setLogFile	(	String 	filePath	)	
+abstract
+设置日志文件。
+
+设置 SDK 的输出 log 文件。SDK 运行时产生的所有 log 将写入该文件。App 必须保证指定的目录存在而且可写。
+
+参数
+filePath	日志文件的完整路径。该日志文件为 UTF-8 编码。默认路径为 /sdcard/{App 的包名}/agorasdk.log。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ setLogFilter()
+abstract int io.agora.rtc.RtcEngine.setLogFilter	(	int 	filter	)	
+abstract
+设置日志过滤器。
+
+该方法设置 SDK 的输出日志过滤等级。不同的过滤等级可以单独或组合使用。 日志级别顺序依次为 OFF、CRITICAL、ERROR、WARNING、INFO 和 DEBUG。选择一个级别，你就可以看到在该级别之前所有级别的日志信息。 例如，你选择 WARNING 级别，就可以看到在 CRITICAL、ERROR 和 WARNING 级别上的所有日志信息。
+
+参数
+filter	设置过滤器等级：
+LOG_FILTER_OFF(0)：不输出任何日志
+LOG_FILTER_DEBUG(0x80f)：输出所有的 API 日志
+LOG_FILTER_INFO(0x0f)：输出 CRITICAL、ERROR、WARNING、INFO 级别的日志
+LOG_FILTER_WARNING(0x0e)：仅输出 CRITICAL、ERROR、WARNING 级别的日志
+LOG_FILTER_ERROR(0x0c)：仅输出 CRITICAL、ERROR 级别的日志
+LOG_FILTER_CRITICAL(0x08)：仅输出 CRITICAL 级别的日志
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ getNativeHandle()
+abstract long io.agora.rtc.RtcEngine.getNativeHandle	(		)	
+abstract
+返回 SDK 引擎的 Native 句柄。
+
+该方法用于获取 SDK 引擎的 C++ 句柄并将其应用于包括注册音视频帧观察器的特殊场景。
+
+返回
+SDK 引擎的 Native 句柄。
+◆ addHandler()
+void io.agora.rtc.RtcEngine.addHandler	(	IRtcEngineEventHandler 	handler	)	
+添加主回调事件。
+
+IRtcEngineEventHandler 接口类用于 SDK 向 App 发送回调事件通知，App 通过继承该接口类的方法获取 SDK 的事件通知。详见 IRtcEngineEventHandler。 接口类的所有方法都有缺省（空）实现，App 可以根据需要只继承关心的事件。在回调方法中，App 不应该做耗时或者调用可能会引起阻塞的 API（如 SendMessage），否则可能影响 SDK 的运行。
+
+参数
+handler	IRtcEngineEventHandler
+◆ enableHighPerfWifiMode()
+abstract boolean io.agora.rtc.RtcEngine.enableHighPerfWifiMode	(	boolean 	enable	)	
+abstract
+启用/关闭 WiFi 模式。
+
+弃用:
+该方法已废弃。不建议你使用。
+参数
+enable	
+true：启用 Wifi 模式
+false：关闭 Wifi 模式
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ getErrorDescription()
+static String io.agora.rtc.RtcEngine.getErrorDescription	(	int 	error	)	
+static
+获取错误码或警告码描述。
+
+参数
+error	Warning code 或 Error code 中的详细错误码或警告码描述。
+返回
+0：方法调用成功
+< 0：方法调用失败
+◆ monitorHeadsetEvent()
+abstract void io.agora.rtc.RtcEngine.monitorHeadsetEvent	(	boolean 	monitor	)	
+abstract
+是否监听外部头戴设备事件。
+
+弃用:
+该方法已废弃。不建议你使用。
+参数
+monitor	
+true：监听外部头戴设备事件
+false：不监听外部头戴设备事件
+◆ monitorBluetoothHeadsetEvent()
+abstract void io.agora.rtc.RtcEngine.monitorBluetoothHeadsetEvent	(	boolean 	monitor	)	
+abstract
+是否监听蓝牙头戴设备事件。
+
+弃用:
+该方法已废弃。不建议你使用。
+参数
+monitor	
+true：监听蓝牙头戴设备事件
+false：不监听蓝牙头戴设备事件
+◆ setPreferHeadset()
+abstract void io.agora.rtc.RtcEngine.setPreferHeadset	(	boolean 	enabled	)	
+abstract
+设置是否优先使用听筒。
+
+弃用:
+该方法已废弃。不建议你使用。
+参数
+enabled	
+true：优先使用听筒
+false：不优先使用听筒

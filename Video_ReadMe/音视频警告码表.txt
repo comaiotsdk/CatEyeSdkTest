@@ -1,0 +1,83 @@
+详细描述
+警告代码。
+
+类成员变量说明
+◆ WARN_PENDING
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_PENDING = Constants.WARN_PENDING
+static
+20： 请求处于待定状态。一般是由于某个模块还没准备好，请求被延迟处理。
+
+◆ WARN_INIT_VIDEO
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_INIT_VIDEO = Constants.WARN_INIT_VIDEO
+static
+16：初始化视频功能失败。有可能是因视频资源被占用导致的。用户无法看到视频画面，但不影响语音通信。
+
+◆ WARN_INVALID_VIEW
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_INVALID_VIEW = Constants.WARN_INVALID_VIEW
+static
+8：指定的 View 无效，使用视频功能时需要指定 view，如果 view 尚未指定，则返回该警告。
+
+◆ WARN_NO_AVAILABLE_CHANNEL
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_NO_AVAILABLE_CHANNEL = Constants.WARN_NO_AVAILABLE_CHANNEL
+static
+103：没有可用的频道资源。可能是因为服务端没法分配频道资源。
+
+◆ WARN_LOOKUP_CHANNEL_TIMEOUT
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_LOOKUP_CHANNEL_TIMEOUT = Constants.WARN_LOOKUP_CHANNEL_TIMEOUT
+static
+104：查找频道超时。在加入频道时 SDK 先要查找指定的频道，出现该警告一般是因为网络太差，连接不到服务器。
+
+◆ WARN_LOOKUP_CHANNEL_REJECTED
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_LOOKUP_CHANNEL_REJECTED = Constants.WARN_LOOKUP_CHANNEL_REJECTED
+static
+105：查找频道请求被服务器拒绝。服务器可能没有办法处理这个请求或请求是非法的。
+
+◆ WARN_OPEN_CHANNEL_TIMEOUT
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_OPEN_CHANNEL_TIMEOUT = Constants.WARN_OPEN_CHANNEL_TIMEOUT
+static
+106：打开频道超时。查找到指定频道后，SDK 接着打开该频道，超时一般是因为网络太差，连接不到服务器。
+
+◆ WARN_OPEN_CHANNEL_REJECTED
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_OPEN_CHANNEL_REJECTED = Constants.WARN_OPEN_CHANNEL_REJECTED
+static
+107：打开频道请求被服务器拒绝。服务器可能没有办法处理该请求或该请求是非法的。
+
+◆ WARN_OPEN_CHANNEL_INVALID_TICKET
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_OPEN_CHANNEL_INVALID_TICKET = Constants.WARN_OPEN_CHANNEL_INVALID_TICKET
+static
+121：TICKET 非法，打开频道失败。
+
+◆ WARN_OPEN_CHANNEL_TRY_NEXT_VOS
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_OPEN_CHANNEL_TRY_NEXT_VOS = Constants.WARN_OPEN_CHANNEL_TRY_NEXT_VOS
+static
+122：尝试打开另一个服务器。
+
+◆ WARN_AUDIO_MIXING_OPEN_ERROR
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_AUDIO_MIXING_OPEN_ERROR = Constants.WARN_AUDIO_MIXING_OPEN_ERROR
+static
+701：打开伴奏出错。
+
+◆ WARN_ADM_RUNTIME_PLAYOUT_WARNING
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_ADM_RUNTIME_PLAYOUT_WARNING = Constants.WARN_ADM_RUNTIME_PLAYOUT_WARNING
+static
+1014：音频设备模块：运行时播放设备出现警告。
+
+◆ WARN_ADM_RUNTIME_RECORDING_WARNING
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_ADM_RUNTIME_RECORDING_WARNING = Constants.WARN_ADM_RUNTIME_RECORDING_WARNING
+static
+1016：音频设备模块：运行时录音设备出现警告。
+
+◆ WARN_ADM_RECORD_AUDIO_SILENCE
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_ADM_RECORD_AUDIO_SILENCE = Constants.WARN_ADM_RECORD_AUDIO_SILENCE
+static
+1019：音频设备模块：没有采集到有效的声音数据。该警告不影响正常通话。
+
+◆ WARN_ADM_RECORD_IS_OCCUPIED
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_ADM_RECORD_IS_OCCUPIED = Constants.WARN_ADM_RECORD_IS_OCCUPIED
+static
+1033：音频设备模块：录制设备被占用。
+
+◆ WARN_APM_HOWLING
+final int io.agora.rtc.IRtcEngineEventHandler.WarnCode.WARN_APM_HOWLING = Constants.WARN_APM_HOWLING
+static
+1051：音频设备模块：录音声音监测到啸叫。
