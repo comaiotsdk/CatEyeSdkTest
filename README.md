@@ -29,7 +29,7 @@ Step 2. Add the token to $HOME/.gradle/gradle.properties
 
 ```
  dependencies {
-     implementation 'com.github.comaiotsdk:cateyesdk:v1.0.7'
+     implementation 'com.github.comaiotsdk:cateyesdk:v1.0.8'
  }
 
 ```

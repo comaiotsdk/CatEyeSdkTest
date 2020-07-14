@@ -44,12 +44,13 @@ dependencies {
 
     //Cannot fit requested classes in a single dex file (# methods: 131010 > 65536)
     implementation 'androidx.multidex:multidex:2.0.0'
-    implementation 'com.github.comaiotsdk:cateyesdk:v1.0.7'     //下方注释必看
+    implementation 'com.github.comaiotsdk:cateyesdk:v1.0.8'
+    //下方注释必看
 
     //如果产生第三方库冲突，请按照gradle剔除依赖方式解决，参考如下：
     /*
 
-    implementation ('com.github.comaiotsdk:cateyesdk:v1.0.7'){
+    implementation ('com.github.comaiotsdk:cateyesdk:v1.0.8'){
         exclude group: 'com.okhttp.okhttp3'
     }
 
