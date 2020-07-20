@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
         if (!TextUtils.isEmpty(intentJwtToken)) {
             jwtToken = intentJwtToken;
         } else {
-            jwtToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI2NiIsImlhdCI6MTU1MTI3MTExNiwiaXNzIjoieW91ZGlhbiIsInN1YiI6IntcInVzZXJJZFwiOlwiMTgyMTExMTIyMjNcIn0iLCJleHAiOjE1NTEzNTc1MTZ9.899ceeb247da670b8d3223d2606b9d872799d9298563ebf90d0bab4c1554fce5";
+            jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4OSIsImlhdCI6MTU5NTIxOTEwOCwic3ViIjoie1widXNlcklkXCI6XCIxNTI2Mzk5Mjg5OVwifSIsImlzcyI6IlBPSU5URVlFIiwiZXhwIjoxNTk2NTE1MTA4fQ.38Aa6E6fu23O47QFPOOP1CD7PF4YgXEw27JJm-yN_-w";
         }
 
         initView();
