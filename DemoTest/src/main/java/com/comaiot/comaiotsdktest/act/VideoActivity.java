@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,7 +30,13 @@ import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import sw.AGEventHandler;
 
+import static io.agora.rtc.Constants.VOICE_CHANGER_BABYBOY;
+import static io.agora.rtc.Constants.VOICE_CHANGER_BABYGIRL;
+import static io.agora.rtc.Constants.VOICE_CHANGER_ETHEREAL;
+import static io.agora.rtc.Constants.VOICE_CHANGER_HULK;
 import static io.agora.rtc.Constants.VOICE_CHANGER_OFF;
+import static io.agora.rtc.Constants.VOICE_CHANGER_OLDMAN;
+import static io.agora.rtc.Constants.VOICE_CHANGER_ZHUBAJIE;
 
 @SuppressWarnings("all")
 public class VideoActivity extends AppCompatActivity implements AGEventHandler {
@@ -41,6 +48,9 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
     private FrameLayout mContainer;
     private TextView mLoadText;
     private ProgressBar mLoadProgressBar;
+    private Button mMuteLocalAudio;
+    private Button mMuteRemoteAudio;
+    private Button mLocalAudioType;
 
     private SurfaceView mSurfaceView;
     private int mUid;
@@ -50,6 +60,22 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
     private int measuredHeight;
 
     private static final int PLAY_VIDEO_INTENT = 1;
+
+    // 本地音频采集是否静音
+    private boolean localAudioMute = true;
+    // 远程音频播放是否静音
+    private boolean remoteAudioMute = false;
+    /**
+     * 本地音频音效   缺省为默认音效
+     * VOICE_CHANGER_OLDMAN             老男孩
+     * VOICE_CHANGER_BABYBOY            小男孩
+     * VOICE_CHANGER_BABYGIRL           小女孩
+     * VOICE_CHANGER_ETHEREAL           空灵
+     * VOICE_CHANGER_HULK               浩克
+     * VOICE_CHANGER_ZHUBAJIE           猪八戒
+     * VOICE_CHANGER_OFF                默认
+     */
+    private int local_audio_type = VOICE_CHANGER_OLDMAN;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -79,6 +105,7 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
         previewVideo();
         mApp.getWorkerThread().getRtcEngine().setLocalVoiceChanger(VOICE_CHANGER_OFF);
         mApp.getWorkerThread().getRtcEngine().setChannelProfile(Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
+        //默认本地音频采集关
         mApp.getWorkerThread().getRtcEngine().muteLocalAudioStream(true);
         mApp.getWorkerThread().getRtcEngine().muteRemoteAudioStream(mUid, false);
         mApp.getWorkerThread().getRtcEngine().enableLocalVideo(false);
@@ -95,6 +122,9 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
         mContainer = findViewById(R.id.container_view);
         mLoadText = findViewById(R.id.load_video_text);
         mLoadProgressBar = findViewById(R.id.load_video_progressbar);
+        mMuteLocalAudio = findViewById(R.id.mute_local_audio);
+        mMuteRemoteAudio = findViewById(R.id.mute_remote_audio);
+        mLocalAudioType = findViewById(R.id.local_audio_type);
 
         mContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -107,6 +137,93 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
                 Log.d(TAG, "measuredHeight: " + measuredHeight);
             }
         });
+
+        mMuteLocalAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int muteLocalAudioStream = mApp.getWorkerThread().getRtcEngine().muteLocalAudioStream(!localAudioMute);
+                //SETTING SUCCESS
+                if (muteLocalAudioStream == 0) {
+                    localAudioMute = !localAudioMute;
+                    mMuteLocalAudio.setText(localAudioMute ? "打开对讲" : "关闭对讲");
+                }
+            }
+        });
+
+        mMuteRemoteAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int muteRemoteAudioStream = mApp.getWorkerThread().getRtcEngine().muteRemoteAudioStream(mUid, !remoteAudioMute);
+                //SETTING SUCCESS
+                if (muteRemoteAudioStream == 0) {
+                    remoteAudioMute = !remoteAudioMute;
+                    mMuteLocalAudio.setText(remoteAudioMute ? "打开远程音频" : "关闭远程音频");
+                }
+            }
+        });
+
+        mLocalAudioType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int setLocalVoiceChanger = mApp.getWorkerThread().getRtcEngine().setLocalVoiceChanger(local_audio_type);
+                //SETTING SUCCESS
+                if (setLocalVoiceChanger == 0) {
+                    Toast.makeText(mApp, "本地音频音效设置为: " + getLocalAudioChangerStr(), Toast.LENGTH_LONG).show();
+
+                    setNextLocalAudioChanger();
+                }
+            }
+        });
+    }
+
+    private void setNextLocalAudioChanger() {
+        switch (local_audio_type) {
+            case VOICE_CHANGER_OLDMAN:
+                local_audio_type = VOICE_CHANGER_BABYBOY;
+                break;
+            case VOICE_CHANGER_BABYBOY:
+                local_audio_type = VOICE_CHANGER_BABYGIRL;
+                break;
+            case VOICE_CHANGER_BABYGIRL:
+                local_audio_type = VOICE_CHANGER_ETHEREAL;
+                break;
+            case VOICE_CHANGER_ETHEREAL:
+                local_audio_type = VOICE_CHANGER_HULK;
+                break;
+            case VOICE_CHANGER_HULK:
+                local_audio_type = VOICE_CHANGER_ZHUBAJIE;
+                break;
+            case VOICE_CHANGER_ZHUBAJIE:
+                local_audio_type = VOICE_CHANGER_OFF;
+                break;
+            case VOICE_CHANGER_OFF:
+                local_audio_type = VOICE_CHANGER_OLDMAN;
+                break;
+            default:
+                local_audio_type = VOICE_CHANGER_OFF;
+                break;
+        }
+    }
+
+    private String getLocalAudioChangerStr() {
+        switch (local_audio_type) {
+            case VOICE_CHANGER_OLDMAN:
+                return "老男孩";
+            case VOICE_CHANGER_BABYBOY:
+                return "小男孩";
+            case VOICE_CHANGER_BABYGIRL:
+                return "小女孩";
+            case VOICE_CHANGER_ETHEREAL:
+                return "空灵";
+            case VOICE_CHANGER_HULK:
+                return "浩克";
+            case VOICE_CHANGER_ZHUBAJIE:
+                return "猪八戒";
+            case VOICE_CHANGER_OFF:
+                return "默认";
+            default:
+                return "未知";
+        }
     }
 
     private void previewVideo() {
