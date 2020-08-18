@@ -99,6 +99,7 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
         mApp = (App) getApplication();
         mApp.getWorkerThread().eventHandler().addEventHandler(this);
 
+
         mApp.getWorkerThread().getRtcEngine().adjustRecordingSignalVolume(100);
         mApp.getWorkerThread().getRtcEngine().adjustPlaybackSignalVolume(300);
         mApp.getWorkerThread().configEngine(1, Constants.VIDEO_PROFILE_720P);
@@ -157,7 +158,7 @@ public class VideoActivity extends AppCompatActivity implements AGEventHandler {
                 //SETTING SUCCESS
                 if (muteRemoteAudioStream == 0) {
                     remoteAudioMute = !remoteAudioMute;
-                    mMuteLocalAudio.setText(remoteAudioMute ? "打开远程音频" : "关闭远程音频");
+                    mMuteRemoteAudio.setText(remoteAudioMute ? "打开远程音频" : "关闭远程音频");
                 }
             }
         });
