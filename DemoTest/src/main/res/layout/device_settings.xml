@@ -295,6 +295,14 @@
                 android:layout_marginTop="15dp"
                 android:text="删除设备" />
 
+            <Button
+                android:id="@+id/check_device_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="检查升级" />
+
+
         </LinearLayout>
 
     </ScrollView>

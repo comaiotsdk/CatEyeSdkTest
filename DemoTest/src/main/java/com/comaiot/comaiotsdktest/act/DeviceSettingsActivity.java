@@ -1,12 +1,15 @@
 package com.comaiot.comaiotsdktest.act;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -23,7 +26,10 @@ import com.comaiot.comaiotsdktest.util.DeviceSettingsCacheUtil;
 import com.comaiot.net.library.bean.AppRemoveAidEntity;
 import com.comaiot.net.library.bean.DeviceSettings;
 import com.comaiot.net.library.bean.DeviceSvrCacheSettings;
+import com.comaiot.net.library.bean.DeviceUpdateContent;
 import com.comaiot.net.library.bean.PartNerQueryDevice;
+import com.comaiot.net.library.bean.UpdateDeviceEntity;
+import com.comaiot.net.library.bean.UpdateVersionInfo;
 import com.comaiot.net.library.controller.view.AppDownloadDevConfigReqView;
 import com.comaiot.net.library.controller.view.AppRemoveAidReqView;
 import com.comaiot.net.library.core.CatEyeSDKInterface;
@@ -31,6 +37,7 @@ import com.comaiot.net.library.core.NoAttachViewException;
 import com.comaiot.net.library.core.NoInternetException;
 import com.comaiot.net.library.inter.GsonUtils;
 import com.comaiot.net.library.req_params.AppDownloadDevConfigEntity;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
 
@@ -67,6 +74,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private Button mShareDeviceButton;
     private Button mShareUsrListButton;
     private Button mDeviceDelete;
+    private Button mCheckDeviceUpdate;
+
+    private AlertDialog mShowUpdateVerInfoDialog;
 
     private String mDevUid;
 
@@ -97,7 +107,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         if (mDeviceSettings == null) {
             CatEyeSDKInterface.get().getDeviceSettings(mDevUid);
-            if (null != mDevice && !mDevice.getOnline().equals("online")) {
+            if (null != mDevice && null != mDevice.getOnline() && mDevice.getOnline().equals("offline")) {
                 getDeviceServerCacheSettings();
             }
         }
@@ -153,6 +163,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private void registerLocalReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(MyIntent.DEVICE_SETTINGS_CHANGED_INTENT);
+        intentFilter.addAction(MyIntent.DEVICE_UPDATE_INTENT);
+        intentFilter.addAction(MyIntent.DEVICE_UPDATE_STATUS_INTENT);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mLocalSettingsChanged, intentFilter);
     }
 
@@ -184,6 +196,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mShareDeviceButton = findViewById(R.id.share_device);
         mShareUsrListButton = findViewById(R.id.share_user_list);
         mDeviceDelete = findViewById(R.id.delete_device);
+        mCheckDeviceUpdate = findViewById(R.id.check_device_update);
 
         mDeviceDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -215,7 +228,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //此处为模拟修改参数，在真实环境使用下请按照UI规范来操作
 
-                if (null == mDeviceSettings || null == mDevice) return;
+                if (null == mDeviceSettings || null == mDevice || null == mDevice.getOnline())
+                    return;
                 if (null != mDevice && mDevice.getOnline().equals("offline")) {
                     Toast.makeText(DeviceSettingsActivity.this, "Device is Offline.", Toast.LENGTH_SHORT).show();
                     return;
@@ -224,6 +238,20 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 mDeviceSettings.setDeviceNickName("Test " + System.currentTimeMillis() / 1000);
                 mDeviceSettings.setRing(1);
                 CatEyeSDKInterface.get().settingDevice(mDevice.getDev_uid(), mDeviceSettings);
+            }
+        });
+
+        mCheckDeviceUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null == mDeviceSettings || null == mDevice || null == mDevice.getOnline())
+                    return;
+                if (null != mDevice && mDevice.getOnline().equals("offline")) {
+                    Toast.makeText(DeviceSettingsActivity.this, "Device is Offline.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                CatEyeSDKInterface.get().checkDeviceVersion(mDevice.getDev_uid());
             }
         });
     }
@@ -417,11 +445,123 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             AppUtils.i("LocalSettingsChanged receive");
-            String devUid = intent.getStringExtra("devUid");
-            if (mDevUid.equals(devUid)) {
-                mDeviceSettings = DeviceSettingsCacheUtil.getInstance().get(devUid);
-                mHandler.sendEmptyMessage(SHOW_SETTINGS_INTENT);
+            if (MyIntent.DEVICE_SETTINGS_CHANGED_INTENT.equals(intent.getAction())) {
+                String devUid = intent.getStringExtra("devUid");
+                if (mDevUid.equals(devUid)) {
+                    mDeviceSettings = DeviceSettingsCacheUtil.getInstance().get(devUid);
+                    mHandler.sendEmptyMessage(SHOW_SETTINGS_INTENT);
+                }
+            } else if (MyIntent.DEVICE_UPDATE_INTENT.equals(intent.getAction())) {
+                UpdateDeviceEntity entity = (UpdateDeviceEntity) intent.getSerializableExtra("updateInfo");
+                String devUid = intent.getStringExtra("devUid");
+                if (null != entity && mDevUid.equals(devUid)) {
+                    // 0 : 无新版本 ; 1 : 有新版本
+                    int updateStatus = entity.getUpdateStatus();
+                    if (updateStatus == 1) {
+                        AlertDialog dialog = new AlertDialog.Builder(DeviceSettingsActivity.this)
+                                .setCancelable(true)
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+
+                                        CatEyeSDKInterface.get().confirmDeviceUpdate(devUid);
+                                    }
+                                })
+                                .create();
+                        dialog.setTitle("New Fota Ver.");
+                        String newFirmVersionContent = entity.getNewFirmVersionContent();
+
+                        List<DeviceUpdateContent> deviceUpdateContents = GsonUtils.fromJson(entity.getNewFirmVersionContent(), new TypeToken<List<DeviceUpdateContent>>() {
+                        }.getType());
+                        String deviceUpdateContentMessage = "";
+                        if (null != deviceUpdateContents) {
+                            deviceUpdateContentMessage = deviceUpdateContents.get(0).getContent();
+                        }
+                        if (null == deviceUpdateContentMessage || deviceUpdateContentMessage.isEmpty()) {
+                            deviceUpdateContentMessage = "";
+                        }
+
+                        dialog.setMessage("New Ver: \n" + entity.getNewFirmVersionName() + "\n\n"
+                                + "New Ver Date: \n" + entity.getNewFirmVersionDate() + "\n\n"
+                                + "New Ver DownloadUrl: \n" + entity.getDownloadUrl() + "\n\n"
+                                + "New Ver Message: \n" + deviceUpdateContentMessage);
+                        dialog.show();
+                    } else {
+                        Toast.makeText(DeviceSettingsActivity.this, "Not Hava New Ver.", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // 无新版本
+                    Toast.makeText(DeviceSettingsActivity.this, "Not Hava New Ver.", Toast.LENGTH_SHORT).show();
+                }
+            } else if (MyIntent.DEVICE_UPDATE_STATUS_INTENT.equals(intent.getAction())) {
+                UpdateVersionInfo updateVersionInfo = (UpdateVersionInfo) intent.getSerializableExtra("updateVerInfo");
+                String devUid = intent.getStringExtra("devUid");
+
+                if (null != updateVersionInfo && mDevUid.equals(devUid)) {
+                    if (null == mShowUpdateVerInfoDialog) {
+
+                        View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.dialog_message_view, null);
+
+                        mShowUpdateVerInfoDialog = new AlertDialog.Builder(DeviceSettingsActivity.this)
+                                .setCancelable(true)
+                                .setView(view)
+                                .setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        mShowUpdateVerInfoDialog = null;
+                                    }
+                                })
+                                .create();
+                        mShowUpdateVerInfoDialog.setTitle("OTA UPDATING...");
+                        mShowUpdateVerInfoDialog.show();
+                    }
+
+                    TextView textView = mShowUpdateVerInfoDialog.findViewById(R.id.tv_dialog);
+
+                    if (updateVersionInfo.getUpdateState() == 1 || updateVersionInfo.getUpdateState() == 4) {
+                        textView.setText("DevUid: \n" + updateVersionInfo.getDevUid() + "\n\n"
+                                + "Status: \n" + getUpdateStatus(updateVersionInfo));
+                        if (updateVersionInfo.getUpdateState() == 4 && null != mShowUpdateVerInfoDialog && mShowUpdateVerInfoDialog.isShowing()) {
+                            mShowUpdateVerInfoDialog.dismiss();
+                        }
+                    } else if (updateVersionInfo.getUpdateState() == 2) {
+                        textView.setText("DevUid: \n" + updateVersionInfo.getDevUid() + "\n\n"
+                                + "Status: \n" + getUpdateStatus(updateVersionInfo) + "\n\n"
+                                + "Progress: \n" + updateVersionInfo.getDownloadSize() + "/" + updateVersionInfo.getTotalSize());
+                    } else if (updateVersionInfo.getUpdateState() == 3) {
+                        textView.setText("DevUid: \n" + updateVersionInfo.getDevUid() + "\n\n"
+                                + "Status: \n" + getUpdateStatus(updateVersionInfo) + "\n\n"
+                                + "Failed Message: \n" + updateVersionInfo.getFailMsg());
+                    }
+                }
             }
         }
     };
+
+    private String getUpdateStatus(UpdateVersionInfo updateVersionInfo) {
+        switch (updateVersionInfo.getUpdateState()) {
+            case 1:
+                return "Start Downloading";    //开始下载
+            case 2:
+                return "Downloading...";          //正在下载
+            case 3:
+                return "Download Failed";         //下载失败
+            case 4:
+                return "Download Complete And Device is Rebooting...";       //下载成功
+        }
+        return "";
+    }
 }

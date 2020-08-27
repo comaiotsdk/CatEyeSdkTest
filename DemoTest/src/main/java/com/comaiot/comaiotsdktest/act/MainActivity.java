@@ -44,6 +44,8 @@ import com.comaiot.net.library.bean.DeviceVideoCloseEvent;
 import com.comaiot.net.library.bean.DeviceWorkModeChangeEvent;
 import com.comaiot.net.library.bean.PartNerQueryDevice;
 import com.comaiot.net.library.bean.PartNerQueryDeviceEntity;
+import com.comaiot.net.library.bean.UpdateDeviceEntity;
+import com.comaiot.net.library.bean.UpdateVersionInfo;
 import com.comaiot.net.library.controller.view.AppDownloadDevConfigReqView;
 import com.comaiot.net.library.controller.view.AppQueryDevConnectReqView;
 import com.comaiot.net.library.controller.view.AppRefreshTokenView;
@@ -592,6 +594,28 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
         AppUtils.e("onMessageSocketLost: " + throwable.toString());
 
         CatEyeSDKInterface.get().reconnectSocket();
+    }
+
+    @Override
+    public void onDeviceUpdateCheckInfo(String devUid, UpdateDeviceEntity entity) {
+        String entityInfoStr = null == entity ? "entity is null" : entity.toString();
+        AppUtils.d("onDeviceUpdateCheckInfo: devUid= " + devUid + " , entity= " + entityInfoStr);
+
+        Intent intent = new Intent(MyIntent.DEVICE_UPDATE_INTENT);
+        intent.putExtra("updateInfo", entity);
+        intent.putExtra("devUid", devUid);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+
+    @Override
+    public void onDeviceUpdateInfo(String devUid, UpdateVersionInfo info) {
+        String updateVerInfoStr = null == info ? "entity is null" : info.toString();
+        AppUtils.d("onDeviceUpdateInfo: devUid= " + devUid + " , info= " + updateVerInfoStr);
+
+        Intent intent = new Intent(MyIntent.DEVICE_UPDATE_STATUS_INTENT);
+        intent.putExtra("updateVerInfo", info);
+        intent.putExtra("devUid", devUid);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
     @Override
