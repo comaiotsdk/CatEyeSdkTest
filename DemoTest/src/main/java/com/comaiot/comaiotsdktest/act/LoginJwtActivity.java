@@ -35,10 +35,10 @@ public class LoginJwtActivity extends AppCompatActivity {
         mLoginJwtButton = findViewById(R.id.login_jwt_button);
         mSkipButton = findViewById(R.id.skip_login);
 
-        String sk = "a9222ecbb94d68194f725475c2dd2d46";                                             //Your SK
-        String jti = "89";                                            //Your jti
-        String iss = "PointEye";                                            //Your iss
-        String phoneNumber = "18211112223";                                    //Your phoneNumber
+        String sk = "";                                             //Your SK
+        String jti = "";                                            //Your jti
+        String iss = "";                                            //Your iss
+        String phoneNumber = "";                                    //Your phoneNumber
         long exp = 1296000000;                                      //Your exp
         Log.d("JWT_Token", createJwt(sk, jti, iss, phoneNumber, exp));
 
