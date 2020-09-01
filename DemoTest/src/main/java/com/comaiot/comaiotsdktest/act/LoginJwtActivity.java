@@ -38,7 +38,7 @@ public class LoginJwtActivity extends AppCompatActivity {
         String sk = "a9222ecbb94d68194f725475c2dd2d46";                                             //Your SK
         String jti = "89";                                            //Your jti
         String iss = "PointEye";                                            //Your iss
-        String phoneNumber = "18211112222";                                    //Your phoneNumber
+        String phoneNumber = "18211112223";                                    //Your phoneNumber
         long exp = 1296000000;                                      //Your exp
         Log.d("JWT_Token", createJwt(sk, jti, iss, phoneNumber, exp));
 

@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
         if (!TextUtils.isEmpty(intentJwtToken)) {
             jwtToken = intentJwtToken;
         } else {
-            jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4OSIsImlhdCI6MTU5NTIxOTc1Miwic3ViIjoie1widXNlcklkXCI6XCIxODIxMTExMjIyMlwifSIsImlzcyI6IlBPSU5URVlFIiwiZXhwIjoxNTk2NTE1NzUyfQ.sMTURznbLsDTkUreEfRBsditzU3gGgZPvzEaPT2YaqE";
+            jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4OSIsImlhdCI6MTU5ODk1OTMyNywic3ViIjoie1widXNlcklkXCI6XCIxODIxMTExMjIyMlwifSIsImlzcyI6IlBvaW50RXllIiwiZXhwIjoxNjAwMjU1MzI3fQ.QykBXPllwRjfMfN-A5LRFFimenLv8mCbHQ7_XMzNUSs";
         }
 
         initView();
@@ -524,6 +524,9 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
             intent.putExtra("devUid", devUid);
             intent.putExtra("deviceEvent", deviceAlarmEvent);
             startActivity(intent);
+        } else if (eventMode.equals("PIR") && alarmEventUrl != null) {
+            long createTime = deviceAlarmEvent.getCreateTime();     //动作发生时间
+            Toast.makeText(this, devUid + " 侦测到运动\n文件类型: " + fileType, Toast.LENGTH_LONG).show();
         }
     }
 

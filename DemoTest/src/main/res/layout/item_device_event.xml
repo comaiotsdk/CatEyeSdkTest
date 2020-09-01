@@ -1,71 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mcxtzhang.swipemenulib.SwipeMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swip_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#fff"
-    android:orientation="horizontal"
-    android:paddingTop="10dp">
+    android:clickable="true"
+    android:paddingBottom="1dp"
+    app:leftSwipe="true"
+    app:swipeEnable="true">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="2dp">
+        android:background="#fff"
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
 
-        <!--消息内容-->
-        <LinearLayout
-            android:id="@+id/item_time_layout"
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical">
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="2dp">
 
-            <TextView
-                android:id="@+id/item_date"
+            <!--消息内容-->
+            <LinearLayout
+                android:id="@+id/item_time_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#999999"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/content_device"
-                android:layout_width="95dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:textColor="#c4c3c3"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <!--消息图片-->
-        <RelativeLayout
-            android:id="@+id/message_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/item_time_layout"
-            android:layout_marginRight="40dp">
-
-            <ImageView
-                android:id="@+id/item_thumbnail"
-                android:layout_width="284dp"
-                android:layout_height="172dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginTop="5dp"
-                android:scaleType="fitStart" />
+                android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/item_thumbnail_video"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_centerInParent="true"
-                android:background="@mipmap/catvideo"
-                android:scaleType="centerInside"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/item_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#999999"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/content_device"
+                    android:layout_width="95dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="#c4c3c3"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <!--消息图片-->
+            <RelativeLayout
+                android:id="@+id/message_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/item_time_layout"
+                android:layout_marginRight="40dp">
+
+                <ImageView
+                    android:id="@+id/item_thumbnail"
+                    android:layout_width="284dp"
+                    android:layout_height="172dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="fitStart" />
+
+                <ImageView
+                    android:id="@+id/item_thumbnail_video"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerInParent="true"
+                    android:background="@mipmap/catvideo"
+                    android:scaleType="centerInside"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
 
         </RelativeLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 
-</LinearLayout>
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:background="#ff4a57"
+        android:text="删除"
+        android:textColor="@android:color/white" />
+
+</com.mcxtzhang.swipemenulib.SwipeMenuLayout>

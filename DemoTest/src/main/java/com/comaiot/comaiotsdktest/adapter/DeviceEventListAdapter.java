@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -24,6 +25,7 @@ import com.comaiot.comaiotsdktest.R;
 import com.comaiot.comaiotsdktest.act.PlayVideoActivity;
 import com.comaiot.comaiotsdktest.util.AppUtils;
 import com.comaiot.net.library.bean.DeviceEventListEntity;
+import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -34,6 +36,7 @@ public class DeviceEventListAdapter extends BaseAdapter {
     private final SimpleDateFormat simpleDateFormat;
     private Context mContext;
     private List<DeviceEventListEntity> mList;
+    private OnItemDeleteClickListener mListener;
 
     public DeviceEventListAdapter(Context context, List<DeviceEventListEntity> deviceEventList) {
         this.mContext = context;
@@ -68,6 +71,8 @@ public class DeviceEventListAdapter extends BaseAdapter {
             holder.message_image_layout = convertView.findViewById(R.id.message_image);
             holder.mImgView = convertView.findViewById(R.id.item_thumbnail);
             holder.item_thumbnail_video = convertView.findViewById(R.id.item_thumbnail_video);
+            holder.swipView = convertView.findViewById(R.id.swip_view);
+            holder.btnDelete = convertView.findViewById(R.id.btnDelete);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -130,6 +135,17 @@ public class DeviceEventListAdapter extends BaseAdapter {
             holder.content_device.setText("低电量报警");
         }
 
+        ViewHolder finalHolder = holder;
+        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finalHolder.swipView.smoothClose();
+                if (null != mListener) {
+                    mListener.onItemDeleteClicked(position);
+                }
+            }
+        });
+
         return convertView;
     }
 
@@ -154,6 +170,10 @@ public class DeviceEventListAdapter extends BaseAdapter {
                 .into(imgView);
     }
 
+    public void setOnItemDeleteClickListener(OnItemDeleteClickListener listener) {
+        this.mListener = listener;
+    }
+
     static class ViewHolder {
         public TextView content_device;
         public ImageView mImgView;
@@ -161,5 +181,11 @@ public class DeviceEventListAdapter extends BaseAdapter {
         public TextView item_date;
         public LinearLayout item_time_layout;
         public RelativeLayout message_image_layout;
+        public Button btnDelete;
+        public SwipeMenuLayout swipView;
+    }
+
+    public interface OnItemDeleteClickListener {
+        void onItemDeleteClicked(int position);
     }
 }

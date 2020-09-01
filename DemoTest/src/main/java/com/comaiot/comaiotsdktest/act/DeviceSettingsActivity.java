@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +28,7 @@ import com.comaiot.net.library.bean.AppRemoveAidEntity;
 import com.comaiot.net.library.bean.DeviceSettings;
 import com.comaiot.net.library.bean.DeviceSvrCacheSettings;
 import com.comaiot.net.library.bean.DeviceUpdateContent;
+import com.comaiot.net.library.bean.GZWXCostomJson;
 import com.comaiot.net.library.bean.PartNerQueryDevice;
 import com.comaiot.net.library.bean.UpdateDeviceEntity;
 import com.comaiot.net.library.bean.UpdateVersionInfo;
@@ -70,11 +72,15 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private TextView mDeviceUseStorage;
     private TextView mDeviceIntelligentNight;
     private TextView mDeviceDoorbellLight;
+    private TextView mDeviceDisturbSwitch;
+    private TextView mDeviceDisturbStart;
+    private TextView mDeviceDisturbEnd;
     private Button mTestSetDeviceButton;
     private Button mShareDeviceButton;
     private Button mShareUsrListButton;
     private Button mDeviceDelete;
     private Button mCheckDeviceUpdate;
+    private Button mDeviceDisturbSettings;
 
     private AlertDialog mShowUpdateVerInfoDialog;
 
@@ -100,6 +106,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDevice = (PartNerQueryDevice) getIntent().getSerializableExtra("device");
         mDevUid = mDevice.getDev_uid();
         AppUtils.i("DeviceSettings PartNerQueryDevice: " + mDevice);
+        AppUtils.i("DeviceSettings PartNerDeviceSettings: " + mDeviceSettings);
 
         initView();
 
@@ -107,7 +114,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         if (mDeviceSettings == null) {
             CatEyeSDKInterface.get().getDeviceSettings(mDevUid);
-            if (null != mDevice && null != mDevice.getOnline() && mDevice.getOnline().equals("offline")) {
+            if (null != mDevice && null != mDevice.getOnline()) {
                 getDeviceServerCacheSettings();
             }
         }
@@ -129,6 +136,12 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
                         DeviceSvrCacheSettings.DeviceStatus deviceStatus = settings.getDevice_status();
                         mDeviceSettings = GsonUtils.fromJson(GsonUtils.toJson(deviceStatus), DeviceSettings.class);
+
+                        mDeviceSettings.setCustomJsonContent(settings.getCustomJsonContent());
+                        AppUtils.i("DeviceSettings PartNerDeviceSettings: " + mDeviceSettings);
+
+                        DeviceSettingsCacheUtil.getInstance().put(devUid, mDeviceSettings);
+
                         showSettings();
                     }
                 }
@@ -192,11 +205,15 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDeviceUseStorage = findViewById(R.id.device_use_stroage);
         mDeviceIntelligentNight = findViewById(R.id.device_intelligentNight);
         mDeviceDoorbellLight = findViewById(R.id.device_doorbellLight);
+        mDeviceDisturbSwitch = findViewById(R.id.device_disturb_switch);
+        mDeviceDisturbStart = findViewById(R.id.device_disturb_start);
+        mDeviceDisturbEnd = findViewById(R.id.device_disturb_end);
         mTestSetDeviceButton = findViewById(R.id.test_set_device_settings);
         mShareDeviceButton = findViewById(R.id.share_device);
         mShareUsrListButton = findViewById(R.id.share_user_list);
         mDeviceDelete = findViewById(R.id.delete_device);
         mCheckDeviceUpdate = findViewById(R.id.check_device_update);
+        mDeviceDisturbSettings = findViewById(R.id.device_disturb_settings);
 
         mDeviceDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -252,6 +269,23 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 }
 
                 CatEyeSDKInterface.get().checkDeviceVersion(mDevice.getDev_uid());
+            }
+        });
+
+        mDeviceDisturbSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null == mDeviceSettings || null == mDevice || null == mDevice.getOnline())
+                    return;
+                if (null != mDevice && mDevice.getOnline().equals("offline")) {
+                    Toast.makeText(DeviceSettingsActivity.this, "Device is Offline.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Intent intent = new Intent(DeviceSettingsActivity.this, DeviceDisturbSettingsActivity.class);
+                intent.putExtra("deviceSettings", mDeviceSettings);
+                intent.putExtra("device", mDevice);
+                startActivity(intent);
             }
         });
     }
@@ -433,6 +467,30 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         int doorbellLight = mDeviceSettings.getDoorbellLight();
         //无屏幕机器设置关
         mDeviceDoorbellLight.setText("按门铃亮屏: " + (doorbellLight == 1 ? "开" : "关"));
+
+        String base64JsonStr = mDeviceSettings.getCustomJsonContent();
+        GZWXCostomJson gzwxCostomJson = GsonUtils.fromJson(new String(Base64.decode(base64JsonStr, Base64.NO_WRAP)), GZWXCostomJson.class);
+
+        mDeviceDisturbSwitch.setText("免打扰开关: " + (gzwxCostomJson.getStatus_flag() == 1 ? "开" : "关"));
+
+        if (gzwxCostomJson.getStatus_flag() == 1) {
+            mDeviceDisturbStart.setVisibility(View.VISIBLE);
+            mDeviceDisturbEnd.setVisibility(View.VISIBLE);
+
+            String startTime = gzwxCostomJson.getStart_time();
+            String startHour = startTime.substring(0, 2);
+            String startMin = startTime.substring(2, 4);
+
+            String endTime = gzwxCostomJson.getEnd_time();
+            String endHour = endTime.substring(0, 2);
+            String endMin = endTime.substring(2, 4);
+
+            mDeviceDisturbStart.setText("免打扰开始时间: " + startHour + ":" + startMin);
+            mDeviceDisturbEnd.setText("免打扰结束时间: " + endHour + ":" + endMin);
+        } else {
+            mDeviceDisturbStart.setVisibility(View.GONE);
+            mDeviceDisturbEnd.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -449,6 +507,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 String devUid = intent.getStringExtra("devUid");
                 if (mDevUid.equals(devUid)) {
                     mDeviceSettings = DeviceSettingsCacheUtil.getInstance().get(devUid);
+
+                    AppUtils.i("DeviceSettings PartNerDeviceSettings: " + mDeviceSettings);
+
                     mHandler.sendEmptyMessage(SHOW_SETTINGS_INTENT);
                 }
             } else if (MyIntent.DEVICE_UPDATE_INTENT.equals(intent.getAction())) {
