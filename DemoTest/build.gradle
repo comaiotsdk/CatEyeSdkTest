@@ -52,7 +52,7 @@ dependencies {
     //如果产生第三方库冲突，请按照gradle剔除依赖方式解决，参考如下：
     /*
 
-    implementation ('com.github.comaiotsdk:cateyesdk:v1.1.0'){
+    implementation ('com.github.comaiotsdk:cateyesdk:v1.1.2'){
         exclude group: 'com.okhttp.okhttp3'
     }
 
