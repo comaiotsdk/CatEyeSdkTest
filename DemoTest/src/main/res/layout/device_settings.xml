@@ -342,6 +342,14 @@
                 android:layout_marginTop="15dp"
                 android:text="免打扰设置" />
 
+            <Button
+                android:id="@+id/device_register_face"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="让猫眼进入录入人脸模式" />
+
+
         </LinearLayout>
 
     </ScrollView>

@@ -88,12 +88,14 @@ public class DeviceEventListAdapter extends BaseAdapter {
         String formatTime = simpleDateFormat.format(uploadDate);
 
         if (msgType.equals("InnerCall")) {
+            convertView.setVisibility(View.VISIBLE);
             holder.item_date.setTextIsSelectable(false);
             holder.item_date.setText("");
             holder.message_image_layout.setVisibility(View.GONE);
             holder.item_thumbnail_video.setVisibility(View.GONE);
             holder.content_device.setText("室内通话事件");
         } else if (msgType.equals("alarm")) {
+            convertView.setVisibility(View.VISIBLE);
             holder.item_date.setTextIsSelectable(false);
             holder.item_date.setText(srcFilename.substring(1, srcFilename.length() - 4).replaceAll("-", ":"));
             holder.message_image_layout.setVisibility(View.VISIBLE);
@@ -115,6 +117,7 @@ public class DeviceEventListAdapter extends BaseAdapter {
                 });
             }
         } else if (msgType.equals("call")) {
+            convertView.setVisibility(View.VISIBLE);
             holder.item_date.setTextIsSelectable(false);
             holder.item_date.setText(srcFilename.substring(1, srcFilename.length() - 4).replaceAll("-", ":"));
             holder.message_image_layout.setVisibility(View.VISIBLE);
@@ -122,17 +125,21 @@ public class DeviceEventListAdapter extends BaseAdapter {
             holder.content_device.setText("门铃事件");
             loadFileUrl(fileUrl, holder.mImgView);
         } else if (msgType.equals("log")) {
+            convertView.setVisibility(View.VISIBLE);
             holder.message_image_layout.setVisibility(View.GONE);
             holder.item_thumbnail_video.setVisibility(View.GONE);
             holder.content_device.setText("设备上传日志");
             holder.item_date.setText("日志下载地址: " + fileUrl);
             holder.item_date.setTextIsSelectable(true);
         } else if (msgType.equals("low_battery")) {
+            convertView.setVisibility(View.VISIBLE);
             holder.item_date.setTextIsSelectable(false);
             holder.item_date.setText("");
             holder.message_image_layout.setVisibility(View.GONE);
             holder.item_thumbnail_video.setVisibility(View.GONE);
             holder.content_device.setText("低电量报警");
+        } else {
+            convertView.setVisibility(View.GONE);
         }
 
         ViewHolder finalHolder = holder;

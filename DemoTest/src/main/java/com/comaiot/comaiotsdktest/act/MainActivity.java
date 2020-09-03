@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,8 +33,12 @@ import com.comaiot.comaiotsdktest.adapter.DeviceListAdapter;
 import com.comaiot.comaiotsdktest.intent.MyIntent;
 import com.comaiot.comaiotsdktest.util.AppUtils;
 import com.comaiot.comaiotsdktest.util.DeviceSettingsCacheUtil;
+import com.comaiot.net.library.bean.AppControlDevice;
 import com.comaiot.net.library.bean.AppQueryDevConnectEntity;
 import com.comaiot.net.library.bean.AudioCallEvent;
+import com.comaiot.net.library.bean.ConfigDeviceRegisterFaceNameInfo;
+import com.comaiot.net.library.bean.CustomBase64JsonContent;
+import com.comaiot.net.library.bean.DevRegisterFaceInfo;
 import com.comaiot.net.library.bean.DeviceAlarmEvent;
 import com.comaiot.net.library.bean.DeviceOnlineEvent;
 import com.comaiot.net.library.bean.DeviceRemoveEvent;
@@ -56,7 +61,9 @@ import com.comaiot.net.library.core.CatEysListener;
 import com.comaiot.net.library.core.NoAttachViewException;
 import com.comaiot.net.library.core.NoInternetException;
 import com.comaiot.net.library.core.NotRegisterDeviceException;
+import com.comaiot.net.library.inter.GsonUtils;
 import com.comaiot.net.library.req_params.AppDownloadDevConfigEntity;
+import com.google.gson.Gson;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -619,6 +626,93 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
         intent.putExtra("updateVerInfo", info);
         intent.putExtra("devUid", devUid);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+
+    @Override
+    public void onDeviceCustomMessageArrived(String devUid, CustomBase64JsonContent content) {
+        String customJsonStr = null == content ? "customJson is null" : content.toString();
+        AppUtils.d("onDeviceCustomMessageArrived: devUid= " + devUid + " , customJson= " + customJsonStr);
+
+        if (null != content) {
+            String base64CustomJson = content.getBase64_custom_json();
+            String customJson = new String(Base64.decode(base64CustomJson, Base64.NO_WRAP));
+            AppUtils.d("customJson= " + customJson);
+            // TODO 自定义JSON，使用者自行对JSON进行解析，因JSON字符串不固定，Bean类需要自定义
+            Toast.makeText(this, "Receive custom json:\n" + customJson, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onDeviceJoinRegisterFaceCallback(String devUid, AppControlDevice controlDevice) {
+        String controlDeviceStr = null == controlDevice ? "controlDevice is null" : controlDevice.toString();
+        AppUtils.d("onDeviceRegisterFaceCallback: devUid= " + devUid + " , controlDeviceStr= " + controlDeviceStr);
+
+        if (null != controlDevice) {
+            int status = controlDevice.getStatus();
+            switch (status) {
+                case 1:
+                    Toast.makeText(this, "Now,Device is Running Rrgister Face.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1001:
+                    Toast.makeText(this, "The Face Size Max is 10.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1002:
+                case 1003:
+                    Toast.makeText(this, "Device Open Camera Failed,Please Check Device Camera.", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onDeviceRegisterFaceProgress(String devUid, DevRegisterFaceInfo devRegisterFaceInfo) {
+        String devRegisterFaceInfoStr = null == devRegisterFaceInfo ? "devRegisterFaceInfo is null" : devRegisterFaceInfo.toString();
+        AppUtils.d("onDeviceRegisterFaceProgress: devUid= " + devUid + " , devRegisterFaceInfoStr= " + devRegisterFaceInfoStr);
+
+        if (null != devRegisterFaceInfo) {
+            int status = devRegisterFaceInfo.getStatus();
+            switch (status) {
+                case 1:
+                    Toast.makeText(this, "Device Register Face is Running.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    Toast.makeText(this, "Device Register Face Success.", Toast.LENGTH_SHORT).show();
+
+                    CatEyeSDKInterface.get().configDeviceRegisterFace(devUid, "Test" + System.currentTimeMillis() / 1000, 0);
+                    break;
+                case 3:
+                    Toast.makeText(this, "Device Exit Register Face.", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onConfigDeviceRegisterFaceInfoCallback(String devUid, ConfigDeviceRegisterFaceNameInfo registerFaceNameInfo) {
+        String registerFaceNameInfoStr = null == registerFaceNameInfo ? "registerFaceNameInfo is null" : registerFaceNameInfo.toString();
+        AppUtils.d("onConfigDeviceRegisterFaceInfoCallback: devUid= " + devUid + " , registerFaceNameInfoStr= " + registerFaceNameInfoStr);
+
+        if (null != registerFaceNameInfo) {
+            int status = registerFaceNameInfo.getStatus();
+            if (status != 0) {
+                switch (status) {
+                    case 1001:
+                        Toast.makeText(this, "Config Register Face Name not support empty.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1002:
+                        Toast.makeText(this, "Config Register Face Name length not support more than 20.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1003:
+                        Toast.makeText(this, "Device Already Have This Name For Register Face.", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            } else {
+                String faceName = registerFaceNameInfo.getFaceName();       //人脸数据名称
+                int other = registerFaceNameInfo.getOther();                //识别人脸报警开关
+
+                Toast.makeText(this, "Device Register Face Config Success.\nName: " + faceName + ",AlarmSwitch: " + other, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

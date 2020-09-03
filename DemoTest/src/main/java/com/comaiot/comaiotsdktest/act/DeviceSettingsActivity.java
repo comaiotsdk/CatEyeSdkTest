@@ -81,6 +81,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private Button mDeviceDelete;
     private Button mCheckDeviceUpdate;
     private Button mDeviceDisturbSettings;
+    private Button mJoinRegisterFaceBtn;
 
     private AlertDialog mShowUpdateVerInfoDialog;
 
@@ -214,6 +215,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDeviceDelete = findViewById(R.id.delete_device);
         mCheckDeviceUpdate = findViewById(R.id.check_device_update);
         mDeviceDisturbSettings = findViewById(R.id.device_disturb_settings);
+        mJoinRegisterFaceBtn = findViewById(R.id.device_register_face);
 
         mDeviceDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -286,6 +288,20 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 intent.putExtra("deviceSettings", mDeviceSettings);
                 intent.putExtra("device", mDevice);
                 startActivity(intent);
+            }
+        });
+
+        mJoinRegisterFaceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null == mDeviceSettings || null == mDevice || null == mDevice.getOnline())
+                    return;
+                if (null != mDevice && mDevice.getOnline().equals("offline")) {
+                    Toast.makeText(DeviceSettingsActivity.this, "Device is Offline.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                CatEyeSDKInterface.get().registerFace(mDevice.getDev_uid());
             }
         });
     }
