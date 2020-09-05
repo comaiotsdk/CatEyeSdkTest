@@ -48,6 +48,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
     private DeviceSettings mDeviceSettings;
     private PartNerQueryDevice mDevice;
+    private String mJwtToken;
 
     private TextView mDeviceId;
     private TextView mDeviceName;
@@ -76,7 +77,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private TextView mDeviceDisturbStart;
     private TextView mDeviceDisturbEnd;
     private Button mTestSetDeviceButton;
-    private Button mShareDeviceButton;
+    private Button mShareDevice2PhoneNumberButton;
     private Button mShareUsrListButton;
     private Button mDeviceDelete;
     private Button mCheckDeviceUpdate;
@@ -105,6 +106,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         mDeviceSettings = (DeviceSettings) getIntent().getSerializableExtra("deviceSettings");
         mDevice = (PartNerQueryDevice) getIntent().getSerializableExtra("device");
+        mJwtToken = getIntent().getStringExtra("jwtToken");
         mDevUid = mDevice.getDev_uid();
         AppUtils.i("DeviceSettings PartNerQueryDevice: " + mDevice);
         AppUtils.i("DeviceSettings PartNerDeviceSettings: " + mDeviceSettings);
@@ -121,6 +123,11 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         }
 
         showSettings();
+
+        boolean isMasterAccount = com.comaiot.net.library.utils.AppUtils.checkAccountMaster(mDevice.getApp_aid(), mDevice.getDev_uid());
+        if (!isMasterAccount) {
+            Toast.makeText(this, "此设备为分享设备.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getDeviceServerCacheSettings() {
@@ -210,7 +217,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDeviceDisturbStart = findViewById(R.id.device_disturb_start);
         mDeviceDisturbEnd = findViewById(R.id.device_disturb_end);
         mTestSetDeviceButton = findViewById(R.id.test_set_device_settings);
-        mShareDeviceButton = findViewById(R.id.share_device);
+
+        mShareDevice2PhoneNumberButton = findViewById(R.id.share_device_to_phone);
         mShareUsrListButton = findViewById(R.id.share_user_list);
         mDeviceDelete = findViewById(R.id.delete_device);
         mCheckDeviceUpdate = findViewById(R.id.check_device_update);
@@ -224,11 +232,12 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             }
         });
 
-        mShareDeviceButton.setOnClickListener(new View.OnClickListener() {
+        mShareDevice2PhoneNumberButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DeviceSettingsActivity.this, ShareDeviceActivity.class);
+                Intent intent = new Intent(DeviceSettingsActivity.this, ShareDeviceToPhoneActivity.class);
                 intent.putExtra("device", mDevice);
+                intent.putExtra("jwtToken", mJwtToken);
                 startActivity(intent);
             }
         });

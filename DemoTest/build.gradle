@@ -8,7 +8,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 29
         versionCode 1
-        versionName "1.1.4"
+        versionName "1.1.5"
 
         //Cannot fit requested classes in a single dex file (# methods: 131010 > 65536)
         multiDexEnabled true
@@ -44,7 +44,7 @@ dependencies {
 
     //Cannot fit requested classes in a single dex file (# methods: 131010 > 65536)
     implementation 'androidx.multidex:multidex:2.0.0'
-    implementation 'com.github.comaiotsdk:cateyesdk:v1.1.4'
+    implementation 'com.github.comaiotsdk:cateyesdk:v1.1.5'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
     //下方注释必看
@@ -52,7 +52,7 @@ dependencies {
     //如果产生第三方库冲突，请按照gradle剔除依赖方式解决，参考如下：
     /*
 
-    implementation ('com.github.comaiotsdk:cateyesdk:v1.1.4'){
+    implementation ('com.github.comaiotsdk:cateyesdk:v1.1.5'){
         exclude group: 'com.okhttp.okhttp3'
     }
 

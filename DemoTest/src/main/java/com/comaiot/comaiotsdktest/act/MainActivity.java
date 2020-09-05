@@ -729,6 +729,7 @@ public class MainActivity extends AppCompatActivity implements CatEysListener, D
             intent.putExtra("deviceSettings", deviceSettings);
         }
         intent.putExtra("device", device);
+        intent.putExtra("jwtToken", jwtToken);
 
         startActivityForResult(intent, 4);
     }

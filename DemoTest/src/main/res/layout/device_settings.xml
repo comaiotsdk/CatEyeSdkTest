@@ -308,7 +308,7 @@
                 android:text="测试设置参数" />
 
             <Button
-                android:id="@+id/share_device"
+                android:id="@+id/share_device_to_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"

@@ -21,6 +21,7 @@ import com.comaiot.net.library.controller.view.AppRemoveSharedDeviceReqView;
 import com.comaiot.net.library.core.CatEyeSDKInterface;
 import com.comaiot.net.library.core.NoAttachViewException;
 import com.comaiot.net.library.core.NoInternetException;
+import com.comaiot.net.library.utils.AppUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +103,14 @@ public class ShareDeviceListActivity extends AppCompatActivity implements Adapte
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+
+                        boolean isMasterAccount = AppUtils.checkAccountMaster(mDevice.getApp_aid(), mDevice.getDev_uid());
+                        if (!isMasterAccount) {
+                            Toast.makeText(ShareDeviceListActivity.this, "你不是此设备的绑定者.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         deleteSharedUsr(shareUser);
                     }
                 })
@@ -140,7 +149,12 @@ public class ShareDeviceListActivity extends AppCompatActivity implements Adapte
 
                 @Override
                 public void onRequestError(String errorMsg, String methodName) {
-
+                    int errCode = Integer.parseInt(errorMsg);
+                    if (errCode == 1203) {
+                        Toast.makeText(ShareDeviceListActivity.this, "此设备不是你所绑定的设备.", Toast.LENGTH_SHORT).show();
+                    } else if (errCode == 1003) {
+                        Toast.makeText(ShareDeviceListActivity.this, "此设备不是分享设备.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         } catch (NoAttachViewException e) {

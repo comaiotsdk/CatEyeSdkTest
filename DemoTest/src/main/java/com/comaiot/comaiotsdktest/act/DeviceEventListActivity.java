@@ -73,14 +73,54 @@ public class DeviceEventListActivity extends AppCompatActivity implements Adapte
             case R.id.refresh_list:
                 getSvrData();
                 return true;
+            case R.id.delete_all_message:
+                deleteAllEvent();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void getSvrData() {
+    private void deleteAllEvent() {
         try {
-            CatEyeSDKInterface.get().getDeviceEventList(mDevAid, mDevUid, Long.parseLong(mBindDate), new AppDownloadFileReqView() {
+            CatEyeSDKInterface.get().deleteAllEvent(mDevAid, mDevUid, new AppRemoveMessageReqView() {
+                @Override
+                public void onRemoveEventSuccess(AppRemoveMessageEntity entity) {
+                    Toast.makeText(DeviceEventListActivity.this, "Delete All Event Success.", Toast.LENGTH_SHORT).show();
+                    getSvrData();
+                }
+
+                @Override
+                public void showLoading() {
+
+                }
+
+                @Override
+                public void hideLoading() {
+
+                }
+
+                @Override
+                public void onRequestSuccess() {
+
+                }
+
+                @Override
+                public void onRequestError(String errorMsg, String methodName) {
+
+                }
+            });
+        } catch (NoAttachViewException e) {
+            e.printStackTrace();
+        } catch (NoInternetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getSvrData() {
+        long time = Long.parseLong(mBindDate);          //从设置的时间(time) - 当前时间内(NOW) 产生的事件列表
+        try {
+            CatEyeSDKInterface.get().getDeviceEventList(mDevAid, mDevUid, time, new AppDownloadFileReqView() {
                 @Override
                 public void onGetEventList(DeviceEventEntity deviceEventEntity) {
                     List<DeviceEventListEntity> deviceEventList = deviceEventEntity.getListEntities();

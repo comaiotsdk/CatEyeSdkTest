@@ -7,4 +7,8 @@
         android:id="@+id/refresh_list"
         android:title="刷新列表" />
 
+    <item
+        android:id="@+id/delete_all_message"
+        android:title="删除全部消息" />
+
 </menu>

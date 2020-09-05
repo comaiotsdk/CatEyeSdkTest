@@ -84,7 +84,7 @@
             android:label="播放视频" />
 
         <activity
-            android:name=".act.ShareDeviceActivity"
+            android:name=".act.ShareDeviceToPhoneActivity"
             android:label="设备分享" />
 
         <activity

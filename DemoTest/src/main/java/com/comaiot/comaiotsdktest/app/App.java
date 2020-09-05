@@ -24,8 +24,8 @@ public class App extends Application {
         MultiDex.install(this);
 
         try {
-            String ak = "072ffed34fd5d282e903017e0abe34e8";             //Your AK
-            String sk = "a9222ecbb94d68194f725475c2dd2d46";             //Your SK
+            String ak = "";             //Your AK
+            String sk = "";             //Your SK
             CatEyeSDKInterface.init(this, "86", ak, sk);
         } catch (NoAttachViewException e) {
             AppUtils.e("NoAttachViewException: " + e.toString());
