@@ -113,10 +113,10 @@ public class DeviceDisturbSettingsActivity extends AppCompatActivity {
 
                     if (mSwitchClose.isChecked()) {
                         String base64JsonStr = mDeviceSettings.getCustomJsonContent();
-                        GZWXCostomJson gzwxCostomJson = GsonUtils.fromJson(new String(Base64.decode(base64JsonStr, Base64.NO_WRAP)), GZWXCostomJson.class);
+                        String customJson = new String(Base64.decode(base64JsonStr, Base64.NO_WRAP));
 
-                        mGzwxCostomJson.setStart_time(gzwxCostomJson.getStart_time());
-                        mGzwxCostomJson.setEnd_time(gzwxCostomJson.getEnd_time());
+                        //TODO 客户自行解析 每个客户都有自己自定义的需求
+                        AppUtils.d("customJson: " + customJson);
                     }
 
                     mGzwxCostomJson.setStatus_flag(mSwitchOpen.isChecked() ? 1 : 0);
@@ -144,11 +144,10 @@ public class DeviceDisturbSettingsActivity extends AppCompatActivity {
 
     private void checkCallbackMessage() {
         String base64JsonStr = mDeviceSettings.getCustomJsonContent();
-        GZWXCostomJson gzwxCostomJson = GsonUtils.fromJson(new String(Base64.decode(base64JsonStr, Base64.NO_WRAP)), GZWXCostomJson.class);
-        if (null != mGzwxCostomJson && null != gzwxCostomJson && gzwxCostomJson.getStatus_flag() == mGzwxCostomJson.getStatus_flag() && gzwxCostomJson.getStart_time().equals(mGzwxCostomJson.getStart_time()) && gzwxCostomJson.getEnd_time().equals(mGzwxCostomJson.getEnd_time())) {
-            Toast.makeText(this, "Setting success.", Toast.LENGTH_SHORT).show();
-            finish();
-        }
+        String customJson = new String(Base64.decode(base64JsonStr, Base64.NO_WRAP));
+
+        //TODO 客户自行解析 每个客户都有自己自定义的需求
+        AppUtils.d("customJson: " + customJson);
     }
 
     private BroadcastReceiver mLocalSettingsChanged = new BroadcastReceiver() {

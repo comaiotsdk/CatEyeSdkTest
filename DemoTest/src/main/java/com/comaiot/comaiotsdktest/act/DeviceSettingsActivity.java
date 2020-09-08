@@ -73,9 +73,6 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private TextView mDeviceUseStorage;
     private TextView mDeviceIntelligentNight;
     private TextView mDeviceDoorbellLight;
-    private TextView mDeviceDisturbSwitch;
-    private TextView mDeviceDisturbStart;
-    private TextView mDeviceDisturbEnd;
     private Button mTestSetDeviceButton;
     private Button mShareDevice2PhoneNumberButton;
     private Button mShareUsrListButton;
@@ -213,9 +210,6 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDeviceUseStorage = findViewById(R.id.device_use_stroage);
         mDeviceIntelligentNight = findViewById(R.id.device_intelligentNight);
         mDeviceDoorbellLight = findViewById(R.id.device_doorbellLight);
-        mDeviceDisturbSwitch = findViewById(R.id.device_disturb_switch);
-        mDeviceDisturbStart = findViewById(R.id.device_disturb_start);
-        mDeviceDisturbEnd = findViewById(R.id.device_disturb_end);
         mTestSetDeviceButton = findViewById(R.id.test_set_device_settings);
 
         mShareDevice2PhoneNumberButton = findViewById(R.id.share_device_to_phone);
@@ -494,28 +488,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDeviceDoorbellLight.setText("按门铃亮屏: " + (doorbellLight == 1 ? "开" : "关"));
 
         String base64JsonStr = mDeviceSettings.getCustomJsonContent();
-        GZWXCostomJson gzwxCostomJson = GsonUtils.fromJson(new String(Base64.decode(base64JsonStr, Base64.NO_WRAP)), GZWXCostomJson.class);
-
-        mDeviceDisturbSwitch.setText("免打扰开关: " + (gzwxCostomJson.getStatus_flag() == 1 ? "开" : "关"));
-
-        if (gzwxCostomJson.getStatus_flag() == 1) {
-            mDeviceDisturbStart.setVisibility(View.VISIBLE);
-            mDeviceDisturbEnd.setVisibility(View.VISIBLE);
-
-            String startTime = gzwxCostomJson.getStart_time();
-            String startHour = startTime.substring(0, 2);
-            String startMin = startTime.substring(2, 4);
-
-            String endTime = gzwxCostomJson.getEnd_time();
-            String endHour = endTime.substring(0, 2);
-            String endMin = endTime.substring(2, 4);
-
-            mDeviceDisturbStart.setText("免打扰开始时间: " + startHour + ":" + startMin);
-            mDeviceDisturbEnd.setText("免打扰结束时间: " + endHour + ":" + endMin);
-        } else {
-            mDeviceDisturbStart.setVisibility(View.GONE);
-            mDeviceDisturbEnd.setVisibility(View.GONE);
-        }
+        String customJson = new String(Base64.decode(base64JsonStr, Base64.NO_WRAP));
+        //TODO 客户自行解析 每个客户都有自己自定义的需求
+        AppUtils.d("customJson: " + customJson);
     }
 
     @Override

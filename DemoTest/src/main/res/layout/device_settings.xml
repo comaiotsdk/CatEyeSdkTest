@@ -268,28 +268,6 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/device_disturb_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="5dp"
-                android:background="#fff"
-                android:paddingLeft="15dp"
-                android:textColor="#000"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/device_disturb_start"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="5dp"
-                android:background="#fff"
-                android:paddingLeft="15dp"
-                android:textColor="#000"
-                android:textSize="20sp" />
-
-            <TextView
                 android:id="@+id/device_disturb_end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
