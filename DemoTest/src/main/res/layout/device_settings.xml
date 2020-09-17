@@ -286,11 +286,18 @@
                 android:text="测试设置参数" />
 
             <Button
-                android:id="@+id/share_device_to_phone"
+                android:id="@+id/share_device"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:text="分享设备" />
+
+            <Button
+                android:id="@+id/share_device_to_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="分享设备到手机号" />
 
             <Button
                 android:id="@+id/share_user_list"
@@ -312,13 +319,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:text="检查升级" />
-
-            <Button
-                android:id="@+id/device_disturb_settings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="免打扰设置" />
 
             <Button
                 android:id="@+id/device_register_face"

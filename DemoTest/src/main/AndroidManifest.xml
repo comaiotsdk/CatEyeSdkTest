@@ -84,6 +84,10 @@
             android:label="播放视频" />
 
         <activity
+            android:name=".act.ShareDeviceActivity"
+            android:label="设备分享" />
+
+        <activity
             android:name=".act.ShareDeviceToPhoneActivity"
             android:label="设备分享" />
 
@@ -94,10 +98,6 @@
         <activity
             android:name=".act.ShareDeviceListActivity"
             android:label="分享设备列表" />
-
-        <activity
-            android:name=".act.DeviceDisturbSettingsActivity"
-            android:label="免打扰时间段设置" />
     </application>
 
 </manifest>

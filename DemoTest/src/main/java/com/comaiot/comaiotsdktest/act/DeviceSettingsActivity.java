@@ -28,7 +28,6 @@ import com.comaiot.net.library.bean.AppRemoveAidEntity;
 import com.comaiot.net.library.bean.DeviceSettings;
 import com.comaiot.net.library.bean.DeviceSvrCacheSettings;
 import com.comaiot.net.library.bean.DeviceUpdateContent;
-import com.comaiot.net.library.bean.GZWXCostomJson;
 import com.comaiot.net.library.bean.PartNerQueryDevice;
 import com.comaiot.net.library.bean.UpdateDeviceEntity;
 import com.comaiot.net.library.bean.UpdateVersionInfo;
@@ -74,11 +73,11 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private TextView mDeviceIntelligentNight;
     private TextView mDeviceDoorbellLight;
     private Button mTestSetDeviceButton;
+    private Button mShareDeviceButton;
     private Button mShareDevice2PhoneNumberButton;
     private Button mShareUsrListButton;
     private Button mDeviceDelete;
     private Button mCheckDeviceUpdate;
-    private Button mDeviceDisturbSettings;
     private Button mJoinRegisterFaceBtn;
 
     private AlertDialog mShowUpdateVerInfoDialog;
@@ -211,18 +210,26 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         mDeviceIntelligentNight = findViewById(R.id.device_intelligentNight);
         mDeviceDoorbellLight = findViewById(R.id.device_doorbellLight);
         mTestSetDeviceButton = findViewById(R.id.test_set_device_settings);
-
+        mShareDeviceButton = findViewById(R.id.share_device);
         mShareDevice2PhoneNumberButton = findViewById(R.id.share_device_to_phone);
         mShareUsrListButton = findViewById(R.id.share_user_list);
         mDeviceDelete = findViewById(R.id.delete_device);
         mCheckDeviceUpdate = findViewById(R.id.check_device_update);
-        mDeviceDisturbSettings = findViewById(R.id.device_disturb_settings);
         mJoinRegisterFaceBtn = findViewById(R.id.device_register_face);
 
         mDeviceDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 deleteDevice();
+            }
+        });
+
+        mShareDeviceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(DeviceSettingsActivity.this, ShareDeviceActivity.class);
+                intent.putExtra("device", mDevice);
+                startActivity(intent);
             }
         });
 
@@ -274,23 +281,6 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 }
 
                 CatEyeSDKInterface.get().checkDeviceVersion(mDevice.getDev_uid());
-            }
-        });
-
-        mDeviceDisturbSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null == mDeviceSettings || null == mDevice || null == mDevice.getOnline())
-                    return;
-                if (null != mDevice && mDevice.getOnline().equals("offline")) {
-                    Toast.makeText(DeviceSettingsActivity.this, "Device is Offline.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Intent intent = new Intent(DeviceSettingsActivity.this, DeviceDisturbSettingsActivity.class);
-                intent.putExtra("deviceSettings", mDeviceSettings);
-                intent.putExtra("device", mDevice);
-                startActivity(intent);
             }
         });
 
