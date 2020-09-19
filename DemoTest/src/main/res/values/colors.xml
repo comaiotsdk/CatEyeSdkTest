@@ -3,4 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="video_backgroud">#000000</color>
+    <color name="transparent">#FFFFFF</color>
+    <color name="cat_file_text_color">#B3B3B3</color>
+    <color name="color_video_button_text">#ffffff</color>
 </resources>

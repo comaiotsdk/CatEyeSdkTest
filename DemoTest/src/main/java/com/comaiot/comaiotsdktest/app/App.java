@@ -38,7 +38,7 @@ public class App extends Application {
         initWorkerThread();
     }
 
-    private void initWorkerThread() {
+    public void initWorkerThread() {
         if (null == mWorkerThread) {
             mWorkerThread = new WorkerThread(getApplicationContext());
             mWorkerThread.start();

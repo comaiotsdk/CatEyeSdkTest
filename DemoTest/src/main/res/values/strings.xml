@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">ComaiotSDKTest</string>
+
+    <string name="title_activity_video">观看视频</string>
+    <string name="screen_shot">截屏</string>
+    <string name="voice">声音</string>
+    <string name="voice_default">原声</string>
+    <string name="voice_uncle">大叔</string>
+    <string name="voice_strange">搞怪</string>
+    <string name="mute">静音</string>
+    <string name="hang_up">挂断</string>
+    <string name="mic_on">点击对讲</string>
+    <string name="mic_off">取消对讲</string>
+    <string name="safe_conn">建立安全连接…</string>
 </resources>

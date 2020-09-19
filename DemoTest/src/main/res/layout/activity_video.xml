@@ -1,59 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/video_backgroud">
 
-    <FrameLayout
-        android:id="@+id/container_view"
-        android:layout_width="match_parent"
-        android:layout_height="202dp"
-        android:layout_centerInParent="true" />
-
-    <TextView
-        android:id="@+id/load_video_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="正在加载"
-        android:textColor="#fff" />
-
-    <ProgressBar
-        android:id="@+id/load_video_progressbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/load_video_text"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="5dp" />
-
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:background="@color/video_backgroud"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title=" "
+            tools:targetApi="lollipop">
+
+            <TextView
+                android:id="@+id/device_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/title_activity_video"
+                android:textColor="@color/cat_file_text_color"
+                android:textSize="17sp" />
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <RelativeLayout
+        android:id="@+id/view_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/app_bar_layout"
         android:layout_marginBottom="10dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:visibility="gone">
 
-        <Button
-            android:id="@+id/mute_local_audio"
+        <TextView
+            android:id="@+id/count_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="打开对讲"
-            android:textAllCaps="false" />
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="00:00:00"
+            android:textColor="@color/cat_file_text_color"
+            android:textSize="17sp"
+            android:visibility="invisible"/>
 
-        <Button
-            android:id="@+id/mute_remote_audio"
+        <RelativeLayout
+            android:id="@+id/local_video_view_container_layout"
+            android:layout_width="match_parent"
+            android:layout_height="202dp"
+            android:layout_below="@id/count_time"
+            android:layout_marginTop="30dp"
+            android:background="@color/transparent">
+
+            <FrameLayout
+                android:id="@+id/local_video_view_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"/>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/muti_btn_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/local_video_view_container_layout">
+
+            <LinearLayout
+                android:id="@+id/btn_mic_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/btn_voice_layout"
+                android:layout_marginBottom="10dp"
+                android:layout_centerHorizontal="true">
+
+                <RadioButton
+                    android:id="@+id/btn_capture"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/icon_capture"
+                    android:gravity="center"
+                    android:text="@string/screen_shot"
+                    android:textColor="@color/color_video_button_text" />
+
+                <RadioButton
+                    android:id="@+id/btn_record_start"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:gravity="center"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="invisible" />
+
+                <RadioButton
+                    android:id="@+id/btn_mute"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/icon_speaker_off"
+                    android:gravity="center"
+                    android:text="@string/voice"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="gone" />
+
+                <RadioButton
+                    android:id="@+id/btn_mute_pressed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/icon_speaker_on"
+                    android:gravity="center"
+                    android:text="@string/voice"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="visible" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_voice_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/btn_voice_default"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/voice_default"
+                    android:gravity="center"
+                    android:text="@string/voice_default"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="visible" />
+
+                <RadioButton
+                    android:id="@+id/btn_voice_uncle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/voice_uncle"
+                    android:gravity="center"
+                    android:text="@string/voice_uncle"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="gone" />
+
+                <RadioButton
+                    android:id="@+id/btn_voice_strange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/voice_strange"
+                    android:gravity="center"
+                    android:text="@string/voice_strange"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="gone" />
+
+                <RadioButton
+                    android:id="@+id/btn_hangup"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@drawable/icon_hangup_selector"
+                    android:gravity="center"
+                    android:text="@string/hang_up"
+                    android:textColor="@color/color_video_button_text" />
+
+                <RadioButton
+                    android:id="@+id/btn_mic_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/icon_mic_off"
+                    android:gravity="center"
+                    android:text="@string/mic_on"
+                    android:textColor="@color/color_video_button_text" />
+
+                <RadioButton
+                    android:id="@+id/btn_mic_on"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawablePadding="10dp"
+                    android:drawableTop="@mipmap/icon_mic_on"
+                    android:gravity="center"
+                    android:text="@string/mic_off"
+                    android:textColor="@color/color_video_button_text"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/view_animate_connect"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/app_bar_layout"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/connect_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="关闭远程音频"
-            android:textAllCaps="false" />
+            android:layout_centerInParent="true"
+            android:layout_marginTop="20dp"
+            android:singleLine="true"
+            android:text="@string/safe_conn"
+            android:textColor="@color/color_video_button_text"
+            android:textSize="14sp" />
 
-        <Button
-            android:id="@+id/local_audio_type"
+        <ImageView
+            android:id="@+id/VideoGif"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@+id/connect_text"
+            android:layout_centerInParent="true" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="本地音频效果"
-            android:textAllCaps="false" />
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/btn_hang_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:background="@null"
+                android:src="@drawable/icon_hangup_selector" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:text="@string/hang_up"
+                android:textColor="@color/color_video_button_text"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>
+

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_all_transparent_bg"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dialog_input_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="18dp"
+        android:gravity="center"
+        android:lineSpacingExtra="10dp"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/dialog_ok"
+                android:layout_width="100dp"
+                android:layout_height="31dp"
+                android:layout_centerHorizontal="true"
+                android:background="@mipmap/btn_continue_video_dialog"
+                android:text="立刻退出"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/dialog_cancel"
+                android:layout_width="100dp"
+                android:layout_height="31dp"
+                android:layout_centerHorizontal="true"
+                android:background="@mipmap/btn_continue_video_dialog"
+                android:text="继续查看"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

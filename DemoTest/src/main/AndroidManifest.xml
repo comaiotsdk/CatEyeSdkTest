@@ -69,7 +69,10 @@
 
         <activity
             android:name=".act.VideoActivity"
-            android:label="音视频查看" />
+            android:label="音视频查看"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
 
         <activity
             android:name=".act.DeviceEventListActivity"
