@@ -73,7 +73,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="15dp"
             android:singleLine="true"
-            android:text="aHR0cDovL2Jjcy5jb21haW90c3ZyLmNvbS9pb3QvZ2V0U2Nhbi5waHA%2FdG9rZW49YTViY2NiYjI2OTQxNDNmMmIwMWM3NDlhYjRiNmFmZDE%3D"
+            android:text=""
             android:textColor="#000"
             android:textSize="18sp" />
 
