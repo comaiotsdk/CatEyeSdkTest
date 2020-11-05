@@ -92,6 +92,7 @@ public class AudioActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.finish_audio_call:
+                CatEyeSDKInterface.get().hangUpAudio(mChannel);
                 finish();
                 break;
             case R.id.accept_audio_call:
