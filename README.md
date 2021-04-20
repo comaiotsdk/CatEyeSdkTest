@@ -19,7 +19,7 @@ Step 2. Add the dependency
 =
 ```
  dependencies {
-     implementation 'com.github.comaiotsdk:cateyesdk:v1.1.7'
+     implementation 'com.github.comaiotsdk:cateyesdk:v1.1.8'
  }
 
 ```
