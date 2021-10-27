@@ -84,6 +84,13 @@ public class DeviceEventListAdapter extends BaseAdapter {
         String fileType = deviceEventListEntity.getFile_type();
         String srcFilename = deviceEventListEntity.getSrc_filename();
         long uploadDate = deviceEventListEntity.getUpload_date();
+        String from_id = deviceEventListEntity.getFrom_id();
+        boolean isFaceVerify = false;
+        if (null != from_id && from_id.startsWith("Face_Recognition-")) {
+            isFaceVerify = true;
+        } else {
+            isFaceVerify = false;
+        }
 
         String formatTime = simpleDateFormat.format(uploadDate);
 
@@ -99,7 +106,14 @@ public class DeviceEventListAdapter extends BaseAdapter {
             holder.item_date.setTextIsSelectable(false);
             holder.item_date.setText(srcFilename.substring(1, srcFilename.length() - 4).replaceAll("-", ":"));
             holder.message_image_layout.setVisibility(View.VISIBLE);
-            holder.content_device.setText("侦测报警事件");
+
+
+            if (isFaceVerify) {
+                String faceName = from_id.substring("Face_Recognition-".length());
+                holder.content_device.setText("侦测报警事件,识别到人脸： " + faceName);
+            } else {
+                holder.content_device.setText("侦测报警事件");
+            }
 
             if (fileType.equals("image")) {
                 loadFileUrl(fileUrl, holder.mImgView);
@@ -122,7 +136,13 @@ public class DeviceEventListAdapter extends BaseAdapter {
             holder.item_date.setText(srcFilename.substring(1, srcFilename.length() - 4).replaceAll("-", ":"));
             holder.message_image_layout.setVisibility(View.VISIBLE);
             holder.item_thumbnail_video.setVisibility(View.GONE);
-            holder.content_device.setText("门铃事件");
+
+            if (isFaceVerify) {
+                String faceName = from_id.substring("Face_Recognition-".length());
+                holder.content_device.setText("门铃事件,识别到人脸： " + faceName);
+            } else {
+                holder.content_device.setText("门铃事件");
+            }
             loadFileUrl(fileUrl, holder.mImgView);
         } else if (msgType.equals("log")) {
             convertView.setVisibility(View.VISIBLE);
