@@ -1,5 +1,5 @@
 # CatEyeSdkTest
-COMAIOT 云控慧联 Android端SDK
+智能猫眼 Android端SDK
 
 Step 1. Add the JitPack repository to your build file
  =
