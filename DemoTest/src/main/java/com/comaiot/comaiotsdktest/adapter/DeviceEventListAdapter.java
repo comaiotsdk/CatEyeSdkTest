@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -25,7 +26,6 @@ import com.comaiot.comaiotsdktest.R;
 import com.comaiot.comaiotsdktest.act.PlayVideoActivity;
 import com.comaiot.comaiotsdktest.util.AppUtils;
 import com.comaiot.net.library.bean.DeviceEventListEntity;
-import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -166,7 +166,7 @@ public class DeviceEventListAdapter extends BaseAdapter {
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finalHolder.swipView.smoothClose();
+                finalHolder.swipView.computeScroll();
                 if (null != mListener) {
                     mListener.onItemDeleteClicked(position);
                 }
@@ -209,7 +209,7 @@ public class DeviceEventListAdapter extends BaseAdapter {
         public LinearLayout item_time_layout;
         public RelativeLayout message_image_layout;
         public Button btnDelete;
-        public SwipeMenuLayout swipView;
+        public ScrollView swipView;
     }
 
     public interface OnItemDeleteClickListener {
