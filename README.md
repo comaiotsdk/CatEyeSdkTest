@@ -9,6 +9,7 @@ Step 1. Add the JitPack repository to your build file
     allprojects {
     		repositories {
     			...
+    			mavenCentral()
     			maven { url 'https://jitpack.io' }
     		}
     	}
@@ -19,7 +20,7 @@ Step 2. Add the dependency
 =
 ```
  dependencies {
-     implementation 'com.github.comaiotsdk:cateyesdk:v1.1.8'
+     implementation 'com.github.comaiotsdk:cateyesdk:v1.1.9'
  }
 
 ```
